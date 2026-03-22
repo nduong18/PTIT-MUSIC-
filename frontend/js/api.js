@@ -47,6 +47,8 @@ const api = {
     // Playlists
     getPlaylists: () => api.request('/playlists', 'GET', null, true),
     createPlaylist: (name) => api.request('/playlists', 'POST', { name }, true),
+    renamePlaylist: (id, name) => api.request(`/playlists/${id}`, 'PUT', { name }, true),
+    deletePlaylist: (id) => api.request(`/playlists/${id}`, 'DELETE', null, true),
     addSongToPlaylist: (playlistId, songId) => api.request(`/playlists/${playlistId}/songs`, 'POST', { song_id: songId }, true),
     getPlaylistSongs: (playlistId) => api.request(`/playlists/${playlistId}/songs`, 'GET', null, true),
 

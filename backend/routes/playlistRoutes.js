@@ -69,4 +69,39 @@ router.get('/:id/songs', verifyToken, async (req, res) => {
     }
 });
 
+// Delete a playlist
+router.delete('/:id', verifyToken, async (req, res) => {
+    try {
+        const playlistId = req.params.id;
+        
+        const [playlist] = await pool.query('SELECT id FROM playlists WHERE id = ? AND user_id = ?', [playlistId, req.userId]);
+        if (playlist.length === 0) return res.status(403).json({ message: "Unauthorized or not found" });
+
+        await pool.query('DELETE FROM playlists WHERE id = ? AND user_id = ?', [playlistId, req.userId]);
+        res.json({ message: "Playlist deleted successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error deleting playlist" });
+    }
+});
+
+// Rename a playlist
+router.put('/:id', verifyToken, async (req, res) => {
+    try {
+        const playlistId = req.params.id;
+        const { name } = req.body;
+        
+        if (!name || !name.trim()) return res.status(400).json({ message: "Playlist name is required" });
+
+        const [playlist] = await pool.query('SELECT id FROM playlists WHERE id = ? AND user_id = ?', [playlistId, req.userId]);
+        if (playlist.length === 0) return res.status(403).json({ message: "Unauthorized or not found" });
+
+        await pool.query('UPDATE playlists SET name = ? WHERE id = ? AND user_id = ?', [name.trim(), playlistId, req.userId]);
+        res.json({ message: "Playlist renamed successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error renaming playlist" });
+    }
+});
+
 module.exports = router;

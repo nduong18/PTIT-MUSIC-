@@ -2,6 +2,7 @@ const app = {
     currentUser: null,
     playlists: [],
     allSongs: [],
+    currentPlaylistId: null,
 
     async init() {
         this.checkAuth();
@@ -138,14 +139,46 @@ const app = {
         });
     },
 
-    async createPlaylist() {
-        const name = prompt("Nhập tên Playlist mới:");
-        if (name && name.trim()) {
+    async handleCreatePlaylist(event) {
+        event.preventDefault();
+        const nameInput = document.getElementById('playlist-name-input');
+        const name = nameInput.value.trim();
+        if (name) {
             try {
                 await api.createPlaylist(name);
                 this.showToast('Đã tạo playlist!');
                 this.loadPlaylists();
-            } catch(e) { this.showToast(e.message, true); }
+                const modal = bootstrap.Modal.getInstance(document.getElementById('createPlaylistModal'));
+                if (modal) modal.hide();
+                nameInput.value = '';
+                document.getElementById('createPlaylistForm').reset();
+            } catch(e) { this.showToast('Lỗi tạo playlist: ' + e.message, true); }
+        }
+    },
+
+    async handleRenamePlaylist(event) {
+        event.preventDefault();
+        if (!this.currentPlaylistId) return;
+        const nameInput = document.getElementById('rename-playlist-name-input');
+        const newName = nameInput.value.trim();
+        if (newName) {
+            try {
+                await api.renamePlaylist(this.currentPlaylistId, newName);
+                this.showToast('Đã đổi tên playlist!');
+                this.loadPlaylists(); // update sidebar
+                const modal = bootstrap.Modal.getInstance(document.getElementById('renamePlaylistModal'));
+                if (modal) modal.hide();
+                // Update UI title immediately
+                document.getElementById('library-title').textContent = "Playlist: " + newName;
+                
+                // Update the onclick for renameBtn so next click has the new name
+                const renameBtn = document.getElementById('btn-rename-playlist');
+                if (renameBtn) {
+                    renameBtn.onclick = () => {
+                        document.getElementById('rename-playlist-name-input').value = newName;
+                    };
+                }
+            } catch(e) { this.showToast('Lỗi đổi tên: ' + e.message, true); }
         }
     },
 
@@ -280,8 +313,21 @@ const app = {
         this.renderSongGrid(filtered, 'search-results-container');
     },
 
+    renderLibrary() {
+        this.currentPlaylistId = null;
+        document.getElementById('library-title').textContent = "Thư viện của bạn";
+        document.getElementById('btn-rename-playlist')?.classList.add('d-none');
+        document.getElementById('btn-delete-playlist')?.classList.add('d-none');
+        document.getElementById('playlist-add-songs-section')?.classList.add('d-none');
+        document.getElementById('library-content-container').innerHTML = '';
+    },
+
     async renderLikedSongs() {
+        this.currentPlaylistId = null;
         document.getElementById('library-title').textContent = "Bài hát đã thích";
+        document.getElementById('btn-rename-playlist')?.classList.add('d-none');
+        document.getElementById('btn-delete-playlist')?.classList.add('d-none');
+        document.getElementById('playlist-add-songs-section')?.classList.add('d-none');
         try {
             const songs = await api.getLikedSongs();
             this.renderSongGrid(songs, 'library-content-container');
@@ -289,12 +335,100 @@ const app = {
     },
 
     async loadPlaylistDetail(id, name) {
+        this.currentPlaylistId = id;
         document.getElementById('library-title').textContent = "Playlist: " + name;
+        
+        const renameBtn = document.getElementById('btn-rename-playlist');
+        if (renameBtn) {
+            renameBtn.classList.remove('d-none');
+            renameBtn.onclick = () => {
+                document.getElementById('rename-playlist-name-input').value = name;
+            };
+        }
+
+        const deleteBtn = document.getElementById('btn-delete-playlist');
+        if (deleteBtn) {
+            deleteBtn.classList.remove('d-none');
+            deleteBtn.onclick = () => this.deletePlaylist(id);
+        }
+
+        const addSection = document.getElementById('playlist-add-songs-section');
+        if (addSection) addSection.classList.remove('d-none');
+        
+        const searchInput = document.getElementById('playlist-search-input');
+        if (searchInput) searchInput.value = '';
+        const searchResults = document.getElementById('playlist-search-results');
+        if (searchResults) searchResults.innerHTML = '';
+
         this.loadView(`playlist-${id}`);
         try {
             const songs = await api.getPlaylistSongs(id);
             this.renderSongGrid(songs, 'library-content-container');
         } catch(e) { this.showToast('Lỗi tải playlist', true); }
+    },
+
+    async deletePlaylist(id) {
+        if (!confirm('Bạn có chắc chắn muốn xóa Playlist này? Số lượng bài hát trong Playlist không bị ảnh hưởng, chỉ có Playlist bị xóa.')) return;
+        try {
+            await api.deletePlaylist(id);
+            this.showToast('Đã xóa Playlist!');
+            this.loadPlaylists();
+            this.loadView('home');
+        } catch(e) {
+            this.showToast('Lỗi xóa playlist: ' + e.message, true);
+        }
+    },
+
+    searchAndAddToPlaylist() {
+        if (!this.currentPlaylistId) return;
+        const query = document.getElementById('playlist-search-input').value.toLowerCase();
+        const resultsContainer = document.getElementById('playlist-search-results');
+        resultsContainer.innerHTML = '';
+        if(!query) return;
+
+        const filtered = this.allSongs.filter(s => 
+            s.title.toLowerCase().includes(query) || 
+            (s.artist_name && s.artist_name.toLowerCase().includes(query))
+        ).slice(0, 5);
+
+        filtered.forEach(song => {
+            const defaultCover = 'https://images.unsplash.com/photo-1621360811013-c76831f1f3b0?q=80&w=400&auto=format&fit=crop';
+            let coverUrl = song.cover_url ? song.cover_url : defaultCover;
+            if(!coverUrl.startsWith('http')) coverUrl = `http://localhost:3000${coverUrl}`;
+
+            const item = document.createElement('div');
+            item.className = 'list-group-item list-group-item-action bg-dark text-white d-flex align-items-center justify-content-between border-secondary py-2 px-3 rounded-2';
+            item.innerHTML = `
+                <div class="d-flex align-items-center gap-3">
+                    <img src="${coverUrl}" alt="${song.title}" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                    <div>
+                        <h6 class="m-0 text-white">${song.title}</h6>
+                        <small class="text-white-50">${song.artist_name || 'Unknown Artist'}</small>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="app.addSongToCurrentPlaylist(${song.id})">Thêm</button>
+            `;
+            resultsContainer.appendChild(item);
+        });
+    },
+
+    async addSongToCurrentPlaylist(songId) {
+        if (!this.currentPlaylistId) return;
+        try {
+            await api.addSongToPlaylist(this.currentPlaylistId, songId);
+            this.showToast('Đã thêm bài hát vào playlist');
+            const searchInput = document.getElementById('playlist-search-input');
+            if(searchInput) searchInput.value = '';
+            const searchResults = document.getElementById('playlist-search-results');
+            if(searchResults) searchResults.innerHTML = '';
+            
+            const currentPlaylistMatch = this.playlists.find(p => p.id === this.currentPlaylistId);
+            if (currentPlaylistMatch) {
+                this.loadPlaylistDetail(this.currentPlaylistId, currentPlaylistMatch.name);
+            }
+        } catch(e) {
+            this.showToast('Lỗi thêm bài hát: ' + e.message, true);
+        }
     },
 
     showAddToPlaylistModal(songId) {

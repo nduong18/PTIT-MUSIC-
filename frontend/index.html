@@ -37,7 +37,7 @@
 
             <div class="auth-only d-none px-3 mt-3 mb-2 d-flex justify-content-between align-items-center" style="opacity: 0.7;">
                 <span class="fw-bold fs-7" style="letter-spacing: 1px;">THƯ VIỆN</span>
-                <i class="fa-solid fa-plus cursor-pointer hover-text-white" onclick="app.createPlaylist()" title="Tạo playlist"></i>
+                <i class="fa-solid fa-plus cursor-pointer hover-text-white" data-bs-toggle="modal" data-bs-target="#createPlaylistModal" title="Tạo playlist"></i>
             </div>
             
             <ul class="nav flex-column auth-only d-none">
@@ -134,9 +134,28 @@
             
             <!-- VIEW: LIBRARY -->
             <div id="view-library" class="d-none px-5 py-4">
-               <h2 class="fw-bold mb-4" id="library-title" style="font-size: 2.5rem; letter-spacing: -1px;">Thư viện của bạn</h2>
-               <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4" id="library-content-container">
-                </div>
+               <div class="d-flex justify-content-between align-items-center mb-4">
+                   <h2 class="fw-bold m-0" id="library-title" style="font-size: 2.5rem; letter-spacing: -1px;">Thư viện của bạn</h2>
+                   <div>
+                       <button class="btn btn-outline-light d-none fw-bold shadow-sm px-4 me-2" id="btn-rename-playlist" style="border-radius: 50px;" data-bs-toggle="modal" data-bs-target="#renamePlaylistModal">Đổi tên</button>
+                       <button class="btn btn-outline-danger d-none fw-bold shadow-sm px-4" id="btn-delete-playlist" style="border-radius: 50px;">Xóa Playlist</button>
+                   </div>
+               </div>
+               <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4 mb-5" id="library-content-container">
+<!-- Populated via JS -->
+               </div>
+               
+               <!-- Playlist Add Songs Section -->
+               <div id="playlist-add-songs-section" class="d-none mt-5 pt-4 border-top border-secondary border-opacity-25 pb-5">
+                   <h4 class="fw-bold mb-3">Thêm bài hát vào playlist này</h4>
+                   <div class="position-relative mb-4" style="max-width: 400px;">
+                       <i class="fa-solid fa-magnifying-glass position-absolute text-white-50" style="left: 16px; top: 50%; transform:translateY(-50%);"></i>
+                       <input type="text" class="form-control rounded-pill border-0 fw-medium py-2 ps-5 shadow-sm" id="playlist-search-input" placeholder="Tìm kiếm bài hát..." onkeyup="app.searchAndAddToPlaylist()" style="background: rgba(255,255,255,0.1); color: white;">
+                   </div>
+                   <div id="playlist-search-results" class="list-group bg-transparent d-flex flex-column gap-2" style="max-width: 600px;">
+                       <!-- Populated via JS -->
+                   </div>
+               </div>
             </div>
         </main>
     </div>
@@ -225,6 +244,46 @@
               <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-4 fw-bold shadow-sm" style="font-size: 1rem; border-radius: 50px;">Đăng ký ngay</button>
               <div class="text-center">
                   <p class="text-secondary mb-0">Đã có tài khoản? <a href="#" class="text-white hover-underline fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</a></p>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Playlist Modal -->
+    <div class="modal fade" id="createPlaylistModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content border-0 p-4 shadow-lg" style="background: linear-gradient(to bottom, #2a2a2a, #121212); border-radius: 12px;">
+          <div class="d-flex justify-content-between align-items-center border-0 mb-3">
+             <h4 class="fw-bold text-white m-0">Tạo playlist</h4>
+             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <form id="createPlaylistForm" onsubmit="app.handleCreatePlaylist(event)">
+              <div class="mb-4">
+                  <input type="text" class="form-control p-3 rounded-3 text-white fw-medium auth-input" id="playlist-name-input" required placeholder="Thêm tên" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);">
+              </div>
+              <div class="d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary-custom fw-bold shadow-sm px-4 py-2" style="border-radius: 50px;">Tạo mới</button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rename Playlist Modal -->
+    <div class="modal fade" id="renamePlaylistModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content border-0 p-4 shadow-lg" style="background: linear-gradient(to bottom, #2a2a2a, #121212); border-radius: 12px;">
+          <div class="d-flex justify-content-between align-items-center border-0 mb-3">
+             <h4 class="fw-bold text-white m-0">Đổi tên playlist</h4>
+             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <form id="renamePlaylistForm" onsubmit="app.handleRenamePlaylist(event)">
+              <div class="mb-4">
+                  <input type="text" class="form-control p-3 rounded-3 text-white fw-medium auth-input" id="rename-playlist-name-input" required placeholder="Tên mới..." style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);">
+              </div>
+              <div class="d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary-custom fw-bold shadow-sm px-4 py-2" style="border-radius: 50px;">Lưu lại</button>
               </div>
           </form>
         </div>
