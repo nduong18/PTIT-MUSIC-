@@ -54,7 +54,8 @@ const app = {
             guestEls.forEach(el => el.classList.remove('d-block', 'd-flex'));
             authEls.forEach(el => el.classList.remove('d-none', 'd-none-important'));
             
-            document.getElementById('user-display-name').textContent = this.currentUser.username;
+            const nameEl = document.getElementById('user-display-name-top');
+            if (nameEl) nameEl.textContent = this.currentUser.username;
             
             if (this.currentUser.role === 'admin') {
                 adminEls.forEach(el => el.classList.remove('d-none', 'd-none-important'));
