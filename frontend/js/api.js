@@ -52,5 +52,12 @@ const api = {
 
     // Liked Songs
     getLikedSongs: () => api.request('/liked', 'GET', null, true),
-    toggleLike: (songId) => api.request(`/liked/${songId}`, 'POST', null, true)
+    toggleLike: (songId) => api.request(`/liked/${songId}`, 'POST', null, true),
+
+    // Admin & Plays
+    getAdminStats: () => api.request('/admin/stats', 'GET', null, true),
+    getUsers: () => api.request('/admin/users', 'GET', null, true),
+    deleteUser: (id) => api.request(`/admin/users/${id}`, 'DELETE', null, true),
+    updateUserRole: (id, role) => api.request(`/admin/users/${id}/role`, 'PUT', { role }, true),
+    recordPlay: (id) => api.request(`/songs/${id}/play`, 'POST')
 };

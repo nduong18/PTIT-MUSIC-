@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS songs (
     mp3_url VARCHAR(255) NOT NULL,
     cover_url VARCHAR(255),
     duration INT DEFAULT 0,
+    play_count INT DEFAULT 0,
     artist_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE SET NULL

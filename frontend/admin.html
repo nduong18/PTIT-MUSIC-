@@ -170,15 +170,15 @@
     <!-- Sidebar -->
     <div class="admin-sidebar">
         <h3 class="fw-bold mb-5 d-flex align-items-center"><i class="fa-solid fa-compact-disc fs-2 text-danger me-3"></i> PTIT Admin</h3>
-        <ul class="nav flex-column gap-2 mb-auto">
+        <ul class="nav flex-column gap-2 mb-auto" id="admin-tabs">
             <li class="nav-item">
-                <a href="#" class="nav-link active"><i class="fa-solid fa-chart-line fs-5 me-3" style="width: 24px;"></i> Tổng quan</a>
+                <a href="javascript:void(0)" class="nav-link active" onclick="switchTab('overview')"><i class="fa-solid fa-chart-line fs-5 me-3" style="width: 24px;"></i> Tổng quan</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fa-solid fa-music fs-5 me-3" style="width: 24px;"></i> Kho Âm nhạc</a>
+                <a href="javascript:void(0)" class="nav-link" onclick="switchTab('music')"><i class="fa-solid fa-music fs-5 me-3" style="width: 24px;"></i> Kho Âm nhạc</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fa-solid fa-users fs-5 me-3" style="width: 24px;"></i> Thành viên</a>
+                <a href="javascript:void(0)" class="nav-link" onclick="switchTab('members')"><i class="fa-solid fa-users fs-5 me-3" style="width: 24px;"></i> Thành viên</a>
             </li>
             <li class="nav-item mt-4">
                 <a href="#" class="nav-link"><i class="fa-solid fa-gear fs-5 me-3" style="width: 24px;"></i> Cài đặt</a>
@@ -208,38 +208,42 @@
             </div>
         </div>
 
-        <!-- Top Status Indicators -->
-        <div class="row g-4 mb-5">
-            <div class="col-md-4">
-                <div class="stat-card d-flex align-items-center gap-4">
-                    <div class="stat-icon bg-red-dim"><i class="fa-solid fa-music"></i></div>
-                    <div>
-                        <h3 class="fw-bold mb-0" id="stat-songs">0</h3>
-                        <span class="text-secondary fw-semibold fs-7 text-uppercase">Tổng Bài Hát</span>
+        <!-- Tab Content Container -->
+        <div id="tab-overview" class="admin-tab">
+            <!-- Top Status Indicators -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="stat-card d-flex align-items-center gap-4">
+                        <div class="stat-icon bg-red-dim"><i class="fa-solid fa-music"></i></div>
+                        <div>
+                            <h3 class="fw-bold mb-0" id="stat-songs">0</h3>
+                            <span class="text-secondary fw-semibold fs-7 text-uppercase">Tổng Bài Hát</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card d-flex align-items-center gap-4">
-                    <div class="stat-icon bg-blue-dim"><i class="fa-solid fa-users"></i></div>
-                    <div>
-                        <h3 class="fw-bold mb-0" id="stat-users">124</h3>
-                        <span class="text-secondary fw-semibold fs-7 text-uppercase">Thành Viên</span>
+                <div class="col-md-4">
+                    <div class="stat-card d-flex align-items-center gap-4">
+                        <div class="stat-icon bg-blue-dim"><i class="fa-solid fa-users"></i></div>
+                        <div>
+                            <h3 class="fw-bold mb-0" id="stat-users">0</h3>
+                            <span class="text-secondary fw-semibold fs-7 text-uppercase">Thành Viên</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card d-flex align-items-center gap-4">
-                    <div class="stat-icon bg-green-dim"><i class="fa-solid fa-play"></i></div>
-                    <div>
-                        <h3 class="fw-bold mb-0">12,450</h3>
-                        <span class="text-secondary fw-semibold fs-7 text-uppercase">Lượt Nghe Tuần Này</span>
+                <div class="col-md-4">
+                    <div class="stat-card d-flex align-items-center gap-4">
+                        <div class="stat-icon bg-green-dim"><i class="fa-solid fa-play"></i></div>
+                        <div>
+                            <h3 class="fw-bold mb-0" id="stat-plays">0</h3>
+                            <span class="text-secondary fw-semibold fs-7 text-uppercase">Tổng Lượt Nghe</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row g-4">
+        <div id="tab-music" class="admin-tab d-none">
+            <div class="row g-4">
             <!-- Upload Box -->
             <div class="col-xl-4">
                 <div class="stat-card h-100 d-flex flex-column">
@@ -306,6 +310,35 @@
                             </tbody>
                         </table>
                     </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-members" class="admin-tab d-none">
+            <div class="stat-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold m-0 opacity-75">Quản lý Thành viên</h4>
+                    <button class="btn btn-sm btn-dark rounded-pill fw-bold px-3 py-2 text-secondary border border-secondary border-opacity-25" onclick="loadUsers()">
+                        <i class="fa-solid fa-rotate-right me-1"></i> TẢI LẠI
+                    </button>
+                </div>
+                
+                <div class="table-responsive pe-2" style="height: 550px; overflow-y: auto;">
+                    <table class="admin-table">
+                        <thead class="sticky-top border-0" style="background: var(--card-bg); z-index: 10;">
+                            <tr>
+                                <th>#</th>
+                                <th>USERNAME / EMAIL</th>
+                                <th>NGÀY THAM GIA</th>
+                                <th>VAI TRÒ</th>
+                                <th class="text-end">TÙY CHỌN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-list">
+                            <!-- JS injected rows -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -336,12 +369,34 @@
                     alert('Quyền truy cập bị từ chối! Bạn không phải Quản Trị Viên.');
                     window.location.href = 'index.html';
                 } else {
+                    loadAdminStats();
                     loadAdminSongs();
+                    loadUsers();
                 }
             } catch(e) {
                 window.location.href = 'index.html';
             }
         };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.admin-tab').forEach(el => el.classList.add('d-none'));
+            document.getElementById(`tab-${tabId}`).classList.remove('d-none');
+            
+            document.querySelectorAll('.admin-sidebar .nav-link').forEach(el => el.classList.remove('active'));
+            const activeIndex = tabId === 'overview' ? 0 : (tabId === 'music' ? 1 : 2);
+            document.querySelectorAll('.admin-sidebar .nav-link')[activeIndex].classList.add('active');
+        }
+
+        async function loadAdminStats() {
+            try {
+                const stats = await api.getAdminStats();
+                document.getElementById('stat-songs').textContent = stats.total_songs || 0;
+                document.getElementById('stat-users').textContent = stats.total_users || 0;
+                document.getElementById('stat-plays').textContent = stats.total_plays || 0;
+            } catch(e) {
+                console.error("Failed to load stats", e);
+            }
+        }
 
         function showToast(msg, isError=false) {
             const tEl = document.getElementById('liveToast');
@@ -450,6 +505,82 @@
                     loadAdminSongs();
                 } catch(e) {
                     showToast(e.message, true);
+                }
+            }
+        }
+
+        async function loadUsers() {
+            const tbody = document.getElementById('admin-users-list');
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div></td></tr>`;
+            try {
+                const users = await api.getUsers();
+                tbody.innerHTML = '';
+                
+                if(users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary py-5 fs-5">Không có người dùng nào.</td></tr>';
+                    return;
+                }
+                
+                users.forEach((u, idx) => {
+                    const date = new Date(u.created_at).toLocaleDateString('vi-VN');
+                    const isCurrentUser = typeof app !== 'undefined' && app.currentUser && app.currentUser.id === u.id;
+                    const roleBadge = u.role === 'admin' 
+                        ? `<span class="badge bg-danger bg-opacity-25 text-danger border border-danger fw-bold px-3 py-1 rounded-pill">Quản trị</span>`
+                        : `<span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary fw-bold px-3 py-1 rounded-pill">Người dùng</span>`;
+                    
+                    const nextRole = u.role === 'admin' ? 'user' : 'admin';
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="text-secondary fw-bold">${idx + 1}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="https://ui-avatars.com/api/?name=${u.username}&background=random&color=fff&size=48" class="rounded-circle shadow-sm" alt="Avatar">
+                                <div>
+                                    <h6 class="mb-1 fw-bold fs-6">${u.username}</h6>
+                                    <span class="text-secondary fs-7 opacity-75">${u.email}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-secondary opacity-75 fs-7">${date}</td>
+                        <td>${roleBadge}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm text-primary hover-text-white border-0 rounded-circle bg-primary bg-opacity-10 opacity-75 hover-opacity-100" style="width: 32px; height: 32px; transition: 0.2s; margin-right: 5px;" title="Cấp/Hạ Quyền" onclick="toggleRole(${u.id}, '${nextRole}')">
+                                <i class="fa-solid fa-user-shield"></i>
+                            </button>
+                            <button class="btn btn-sm text-danger hover-text-white border-0 rounded-circle bg-danger bg-opacity-10 opacity-75 hover-opacity-100" style="width: 32px; height: 32px; transition: 0.2s;" title="Xóa tài khoản" onclick="deleteUser(${u.id})">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4 fw-bold">Không thể lấy dữ liệu thành viên</td></tr>';
+            }
+        }
+
+        async function toggleRole(id, nextRole) {
+            if(confirm('Bạn có chắc chắn muốn thay đổi quyền của người dùng này?')) {
+                try {
+                    await api.updateUserRole(id, nextRole);
+                    showToast('Đã cập nhật quyền thành công');
+                    loadUsers();
+                } catch(e) {
+                    showToast(e.message || 'Lỗi hệ thống', true);
+                }
+            }
+        }
+
+        async function deleteUserDb(id) {
+            if(confirm('Cảnh báo: Hành động này sẽ xóa hoàn toàn cả danh sách nhạc của người dùng. Tiếp tục?')) {
+                try {
+                    await api.deleteUser(id);
+                    showToast('Đã xóa thành viên!');
+                    loadUsers();
+                    loadAdminStats();
+                } catch(e) {
+                    showToast(e.message || 'Không thể xóa', true);
                 }
             }
         }

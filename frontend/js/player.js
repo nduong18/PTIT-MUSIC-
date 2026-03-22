@@ -27,6 +27,7 @@ const player = {
         // Play
         this.audio.src = mp3Url;
         this.audio.play();
+        api.recordPlay(id).catch(err => console.error('Failed to record play', err));
         this.isPlaying = true;
         this.updatePlayBtnUI();
         

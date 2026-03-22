@@ -22,7 +22,7 @@ const upload = multer({ storage: storage });
 router.get('/', async (req, res) => {
     try {
         const [songs] = await pool.query(`
-            SELECT s.id, s.title, s.mp3_url, s.cover_url, s.duration, s.created_at, 
+            SELECT s.id, s.title, s.mp3_url, s.cover_url, s.duration, s.play_count, s.created_at, 
                    a.id as artist_id, a.name as artist_name 
             FROM songs s 
             LEFT JOIN artists a ON s.artist_id = a.id
@@ -71,6 +71,17 @@ router.delete('/:id', [verifyToken, isAdmin], async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error deleting song" });
+    }
+});
+
+// Record a play (Public)
+router.post('/:id/play', async (req, res) => {
+    try {
+        await pool.query('UPDATE songs SET play_count = play_count + 1 WHERE id = ?', [req.params.id]);
+        res.json({ message: "Play recorded successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error recording play" });
     }
 });
 

@@ -25,6 +25,7 @@ app.get('/api/health', (req, res) => {
 
 // Import Routes
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/songs', require('./routes/songRoutes'));
 app.use('/api/playlists', require('./routes/playlistRoutes'));
 app.use('/api/liked', require('./routes/likedSongsRoutes'));
