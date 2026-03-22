@@ -345,12 +345,16 @@ body {
 }
 
 /* Modals */
-.modal-content { background-color: var(--bg-active); border: 1px solid #404040; border-radius: 8px; }
-.modal-header { border-bottom: 1px solid #404040; margin-bottom: 24px; border:0;}
-.modal-footer { border-top: 1px solid #404040; }
-.form-control { background-color: #3e3e3e; border: 1px solid transparent; color: white; transition: 0.2s; }
-.form-control:focus { background-color: #404040; color: white; border-color: #727272; box-shadow: none; }
+.modal-content { background-color: var(--bg-active); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
+.modal-header { border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; border:0;}
+.modal-footer { border-top: 1px solid rgba(255,255,255,0.1); }
+.form-control { background-color: #3e3e3e; border: 1px solid transparent; color: white; transition: all 0.3s ease; }
+.form-control:focus { background-color: #333333; color: white; border-color: var(--text-highlight); box-shadow: 0 0 0 4px rgba(255,255,255,0.1); }
 .form-control::placeholder { color: #888; }
+
+/* Auth Inputs Extra Styles */
+.auth-input:focus { border-color: white !important; background: rgba(255,255,255,0.1) !important; }
+.auth-input:hover { border-color: rgba(255,255,255,0.4) !important; }
 
 /* UTILS */
 .d-none-important { display: none !important; }

@@ -179,23 +179,25 @@
     <!-- Modals -->
     <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 p-4 shadow-lg">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content border-0 p-4 shadow-lg" style="background: linear-gradient(to bottom, #2a2a2a, #121212); border-radius: 12px;">
           <div class="text-center mb-4 mt-2">
             <i class="fa-brands fa-spotify text-danger" style="font-size: 3rem;"></i>
-            <h3 class="fw-bold mt-3 text-white">Đăng nhập vào PTIT Music</h3>
+            <h3 class="fw-bold mt-3 text-white" style="letter-spacing: -0.5px;">Đăng nhập vào PTIT Music</h3>
           </div>
           <form id="loginForm" onsubmit="app.handleLogin(event)">
               <div class="mb-3">
-                  <label class="form-label fw-bold fs-7 text-white">Tên đăng nhập</label>
-                  <input type="text" class="form-control p-3 rounded text-white fw-medium" id="login-username" required placeholder="Tên đăng nhập" style="background:#333; border:1px solid transparent;">
+                  <label class="form-label fw-bold text-white mb-2">Tên đăng nhập</label>
+                  <input type="text" class="form-control p-2 rounded-3 text-white fw-medium auth-input" id="login-username" required placeholder="Tên đăng nhập" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);">
               </div>
               <div class="mb-4">
-                  <label class="form-label fw-bold fs-7 text-white">Mật khẩu</label>
-                  <input type="password" class="form-control p-3 rounded text-white fw-medium" id="login-password" required placeholder="Mật khẩu" style="background:#333; border:1px solid transparent;">
+                  <label class="form-label fw-bold text-white mb-2">Mật khẩu</label>
+                  <input type="password" class="form-control p-2 rounded-3 text-white fw-medium auth-input" id="login-password" required placeholder="Mật khẩu" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);">
               </div>
-              <button type="submit" class="btn btn-primary-custom w-100 py-3 mb-3 fw-bold shadow">Đăng nhập</button>
-              <p class="text-center text-secondary fs-7">Chưa có tài khoản? <a href="#" class="text-white hover-underline fw-bold" data-bs-toggle="modal" data-bs-target="#registerModal">Đăng ký PTIT Music</a></p>
+              <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-4 fw-bold shadow-sm" style="font-size: 1rem; border-radius: 50px;">Đăng nhập</button>
+              <div class="text-center">
+                  <p class="text-secondary mb-0">Chưa có tài khoản? <a href="#" class="text-white hover-underline fw-bold" data-bs-toggle="modal" data-bs-target="#registerModal">Đăng ký PTIT Music</a></p>
+              </div>
           </form>
         </div>
       </div>
@@ -203,26 +205,29 @@
 
     <!-- Register Modal -->
     <div class="modal fade" id="registerModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 p-4 shadow-lg">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content border-0 p-4 shadow-lg" style="background: linear-gradient(to bottom, #2a2a2a, #121212); border-radius: 12px;">
           <div class="text-center mb-4 mt-2">
             <i class="fa-brands fa-spotify text-danger" style="font-size: 3rem;"></i>
-            <h3 class="fw-bold mt-3 text-white">Đăng ký thành viên</h3>
+            <h3 class="fw-bold mt-3 text-white" style="letter-spacing: -0.5px;">Đăng ký tài khoản mới</h3>
           </div>
           <form id="registerForm" onsubmit="app.handleRegister(event)">
               <div class="mb-3">
-                  <label class="form-label fw-bold fs-7 text-white">Email của bạn</label>
-                  <input type="email" class="form-control p-3 rounded text-white fw-medium" id="register-email" required placeholder="name@domain.com" style="background:#333; border:1px solid transparent;">
+                  <label class="form-label fw-bold text-white mb-2">Email của bạn</label>
+                  <input type="email" class="form-control p-2 rounded-3 text-white fw-medium auth-input" id="register-email" required placeholder="name@domain.com" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);">
               </div>
               <div class="mb-3">
-                  <label class="form-label fw-bold fs-7 text-white">Tên đăng nhập</label>
-                  <input type="text" class="form-control p-3 rounded text-white fw-medium" id="register-username" required placeholder="Tên đăng nhập mới" style="background:#333; border:1px solid transparent;">
+                  <label class="form-label fw-bold text-white mb-2">Tên đăng nhập</label>
+                  <input type="text" class="form-control p-2 rounded-3 text-white fw-medium auth-input" id="register-username" required placeholder="Tên đăng nhập mới" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);">
               </div>
               <div class="mb-4">
-                  <label class="form-label fw-bold fs-7 text-white">Tạo mật khẩu</label>
-                  <input type="password" class="form-control p-3 rounded text-white fw-medium" id="register-password" required placeholder="Mật khẩu mạnh" style="background:#333; border:1px solid transparent;">
+                  <label class="form-label fw-bold text-white mb-2">Tạo mật khẩu</label>
+                  <input type="password" class="form-control p-2 rounded-3 text-white fw-medium auth-input" id="register-password" required placeholder="Mật khẩu mạnh" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);">
               </div>
-              <button type="submit" class="btn btn-primary-custom w-100 py-3 mb-3 fw-bold shadow">Đăng ký ngay</button>
+              <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-4 fw-bold shadow-sm" style="font-size: 1rem; border-radius: 50px;">Đăng ký ngay</button>
+              <div class="text-center">
+                  <p class="text-secondary mb-0">Đã có tài khoản? <a href="#" class="text-white hover-underline fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</a></p>
+              </div>
           </form>
         </div>
       </div>

@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
 // Upload a new song (Admin only)
 router.post('/', [verifyToken, isAdmin, upload.fields([{ name: 'mp3', maxCount: 1 }, { name: 'cover', maxCount: 1 }])], async (req, res) => {
     try {
-        const { title, artist_id } = req.body;
+        const { title, artist_name } = req.body;
         
         if (!title || !req.files['mp3']) {
             return res.status(400).json({ message: "Title and MP3 file are required" });
@@ -51,9 +51,20 @@ router.post('/', [verifyToken, isAdmin, upload.fields([{ name: 'mp3', maxCount: 
             cover_url = '/uploads/' + req.files['cover'][0].filename;
         }
 
+        let final_artist_id = null;
+        if (artist_name && artist_name.trim() !== '') {
+            const [existingArtists] = await pool.query('SELECT id FROM artists WHERE name = ?', [artist_name.trim()]);
+            if (existingArtists.length > 0) {
+                final_artist_id = existingArtists[0].id;
+            } else {
+                const [artistResult] = await pool.query('INSERT INTO artists (name) VALUES (?)', [artist_name.trim()]);
+                final_artist_id = artistResult.insertId;
+            }
+        }
+
         const [result] = await pool.query(
             'INSERT INTO songs (title, mp3_url, cover_url, artist_id) VALUES (?, ?, ?, ?)',
-            [title, mp3_url, cover_url, artist_id || null]
+            [title, mp3_url, cover_url, final_artist_id]
         );
 
         res.status(201).json({ message: "Song uploaded successfully", id: result.insertId });

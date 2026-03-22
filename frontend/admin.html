@@ -255,6 +255,12 @@
                             <input type="text" class="form-control rounded px-3 py-2 fw-medium border-0 text-white" id="song-title" placeholder="Ví dụ: Muộn rồi mà sao còn..." style="background: rgba(255,255,255,0.06);" required>
                         </div>
 
+                        <div class="mb-4">
+                            <label class="form-label text-secondary fw-bold fs-7 text-uppercase">Tên nghệ sĩ <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control rounded px-3 py-2 fw-medium border-0 text-white" id="song-artist" list="artist-list" placeholder="Ví dụ: Sơn Tùng M-TP..." style="background: rgba(255,255,255,0.06);" required>
+                            <datalist id="artist-list"></datalist>
+                        </div>
+
                         <div class="mb-4 flex-grow-1">
                             <label class="form-label text-secondary fw-bold fs-7 text-uppercase">Tệp âm thanh & Hình Ảnh <span class="text-danger">*</span></label>
                             
@@ -418,6 +424,7 @@
         document.getElementById('uploadSongForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = document.getElementById('song-title').value;
+            const artist = document.getElementById('song-artist').value;
             const mp3 = document.getElementById('song-mp3').files[0];
             const cover = document.getElementById('song-cover').files[0];
 
@@ -425,6 +432,7 @@
 
             const formData = new FormData();
             formData.append('title', title);
+            formData.append('artist_name', artist);
             formData.append('mp3', mp3);
             if(cover) formData.append('cover', cover);
 
@@ -454,6 +462,15 @@
                 const songs = await api.getSongs();
                 document.getElementById('stat-songs').textContent = songs.length;
                 tbody.innerHTML = '';
+                
+                const artistSet = new Set();
+                songs.forEach(s => {
+                    if(s.artist_name) artistSet.add(s.artist_name);
+                });
+                const datalist = document.getElementById('artist-list');
+                if (datalist) {
+                    datalist.innerHTML = Array.from(artistSet).map(name => `<option value="${name}">`).join('');
+                }
                 
                 if(songs.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary py-5 fs-5">Kho nhạc hiện đang trống. Cần thêm dữ liệu ngay!</td></tr>';
