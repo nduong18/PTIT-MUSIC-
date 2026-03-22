@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Quản Trị - PTIT Music</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --sidebar-bg: #000000;
+            --card-bg: #181818;
+            --card-hover: #282828;
+            --primary-color: #e50914;
+            --primary-hover: #b20710;
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            color: #ffffff; 
+            font-family: 'Inter', sans-serif;
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            margin: 0;
+        }
+
+        /* Sidebar Customization */
+        .admin-sidebar { 
+            width: 280px; 
+            background-color: var(--sidebar-bg); 
+            padding: 32px 24px; 
+            display: flex; 
+            flex-direction: column; 
+            border-right: 1px solid #282828;
+        }
+        
+        .admin-sidebar .nav-link {
+            color: #b3b3b3;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .admin-sidebar .nav-link:hover {
+            color: #ffffff;
+        }
+        
+        .admin-sidebar .nav-link.active {
+            background-color: #282828;
+            color: #ffffff;
+        }
+
+        /* Main Content */
+        .admin-main { 
+            flex: 1; 
+            background: linear-gradient(180deg, #1e090a 0%, var(--bg-color) 300px);
+            overflow-y: auto; 
+            padding: 40px 60px; 
+        }
+
+        /* Stat Cards */
+        .stat-card { 
+            background: var(--card-bg); 
+            border-radius: 12px; 
+            padding: 24px; 
+            transition: transform 0.2s, background 0.2s; 
+            cursor: default; 
+            border: 1px solid #282828;
+        }
+        .stat-card:hover { 
+            transform: translateY(-4px); 
+            background: var(--card-hover); 
+            border-color: #404040;
+        }
+        .stat-icon { 
+            width: 56px; 
+            height: 56px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.5rem; 
+        }
+        
+        /* Table Styles */
+        .admin-table { 
+            width: 100%; 
+            color: white; 
+            border-collapse: separate; 
+            border-spacing: 0 12px; 
+        }
+        .admin-table th { 
+            color: #b3b3b3; 
+            font-weight: 500; 
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 16px 20px; 
+        }
+        .admin-table td { 
+            padding: 16px 20px; 
+            background: var(--card-bg); 
+            vertical-align: middle; 
+            border-top: 1px solid transparent;
+            border-bottom: 1px solid transparent;
+            transition: background 0.2s;
+        }
+        .admin-table tr { cursor: pointer; }
+        .admin-table tbody tr:hover td { background: var(--card-hover); border-color: #404040; }
+        .admin-table tr td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; border-left: 1px solid transparent; }
+        .admin-table tr td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-right: 1px solid transparent; }
+        .admin-table tbody tr:hover td:first-child { border-left-color: #404040; }
+        .admin-table tbody tr:hover td:last-child { border-right-color: #404040; }
+
+        .track-cover-sm { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; }
+        
+        /* Upload UI */
+        .custom-file-upload { 
+            border: 2px dashed #404040; 
+            border-radius: 12px; 
+            padding: 32px 16px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            background: rgba(255,255,255,0.02);
+        }
+        .custom-file-upload:hover { 
+            border-color: var(--primary-color); 
+            background: rgba(229,9,20,0.05); 
+        }
+
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 500px;
+            padding: 14px 32px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .btn-primary-custom:hover {
+            background-color: var(--primary-hover);
+            transform: scale(1.02);
+            color: white;
+        }
+        
+        /* Colors */
+        .fs-7 { font-size: 0.85rem; }
+        .bg-red-dim { background-color: rgba(229, 9, 20, 0.15); color: var(--primary-color); }
+        .bg-blue-dim { background-color: rgba(13, 110, 253, 0.15); color: #4dabf7; }
+        .bg-green-dim { background-color: rgba(25, 135, 84, 0.15); color: #20c997; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+        <h3 class="fw-bold mb-5 d-flex align-items-center"><i class="fa-solid fa-compact-disc fs-2 text-danger me-3"></i> PTIT Admin</h3>
+        <ul class="nav flex-column gap-2 mb-auto">
+            <li class="nav-item">
+                <a href="#" class="nav-link active"><i class="fa-solid fa-chart-line fs-5 me-3" style="width: 24px;"></i> Tổng quan</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fa-solid fa-music fs-5 me-3" style="width: 24px;"></i> Kho Âm nhạc</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fa-solid fa-users fs-5 me-3" style="width: 24px;"></i> Thành viên</a>
+            </li>
+            <li class="nav-item mt-4">
+                <a href="#" class="nav-link"><i class="fa-solid fa-gear fs-5 me-3" style="width: 24px;"></i> Cài đặt</a>
+            </li>
+        </ul>
+        
+        <div class="d-flex align-items-center mb-4 gap-3 bg-dark p-3 rounded shadow-sm border border-secondary" style="background:#181818!important; border-color:#333!important;">
+            <img src="https://ui-avatars.com/api/?name=Admin&background=e50914&color=fff&size=128" class="rounded-circle" width="40" height="40" alt="Admin">
+            <div style="flex:1;">
+                <h6 class="mb-0 fw-bold fs-7">Quản Trị Viên</h6>
+                <small class="text-success fw-bold" style="font-size: 0.7rem;"><i class="fa-solid fa-circle fa-xs me-1"></i>Đang hoạt động</small>
+            </div>
+        </div>
+        
+        <button class="btn btn-outline-secondary w-100 rounded-pill fw-bold border-2" onclick="window.location.href='index.html'">
+            <i class="fa-solid fa-arrow-left me-2"></i> Trở về PTIT Music
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h2 class="fw-bold m-0" style="font-size: 2rem;">Tổng quan hệ thống</h2>
+            <div class="position-relative" style="width: 300px;">
+                <i class="fa-solid fa-magnifying-glass position-absolute text-secondary" style="top:50%; transform:translateY(-50%); left:16px;"></i>
+                <input type="text" class="form-control rounded-pill bg-dark border-0 text-white ps-5 py-2 fw-medium" placeholder="Tìm kiếm bài hát, ca sĩ..." style="background: rgba(255,255,255,0.1)!important;">
+            </div>
+        </div>
+
+        <!-- Top Status Indicators -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stat-card d-flex align-items-center gap-4">
+                    <div class="stat-icon bg-red-dim"><i class="fa-solid fa-music"></i></div>
+                    <div>
+                        <h3 class="fw-bold mb-0" id="stat-songs">0</h3>
+                        <span class="text-secondary fw-semibold fs-7 text-uppercase">Tổng Bài Hát</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card d-flex align-items-center gap-4">
+                    <div class="stat-icon bg-blue-dim"><i class="fa-solid fa-users"></i></div>
+                    <div>
+                        <h3 class="fw-bold mb-0" id="stat-users">124</h3>
+                        <span class="text-secondary fw-semibold fs-7 text-uppercase">Thành Viên</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card d-flex align-items-center gap-4">
+                    <div class="stat-icon bg-green-dim"><i class="fa-solid fa-play"></i></div>
+                    <div>
+                        <h3 class="fw-bold mb-0">12,450</h3>
+                        <span class="text-secondary fw-semibold fs-7 text-uppercase">Lượt Nghe Tuần Này</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Upload Box -->
+            <div class="col-xl-4">
+                <div class="stat-card h-100 d-flex flex-column">
+                    <h4 class="fw-bold mb-4 d-flex align-items-center gap-2"><i class="fa-solid fa-cloud-arrow-up text-danger"></i> Tải bài hát mới</h4>
+                    
+                    <form id="uploadSongForm" class="flex-grow-1 d-flex flex-column">
+                        <div class="mb-4">
+                            <label class="form-label text-secondary fw-bold fs-7 text-uppercase">Tên bài hát <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control rounded px-3 py-2 fw-medium border-0 text-white" id="song-title" placeholder="Ví dụ: Muộn rồi mà sao còn..." style="background: rgba(255,255,255,0.06);" required>
+                        </div>
+
+                        <div class="mb-4 flex-grow-1">
+                            <label class="form-label text-secondary fw-bold fs-7 text-uppercase">Tệp âm thanh & Hình Ảnh <span class="text-danger">*</span></label>
+                            
+                            <!-- Custom MP3 File Input -->
+                            <div class="custom-file-upload mb-3" onclick="document.getElementById('song-mp3').click()">
+                                <i class="fa-solid fa-compact-disc fa-2x mb-3" style="color: #6c757d;"></i>
+                                <h6 class="fw-bold mb-1">Click để chèn MP3</h6>
+                                <p class="m-0 text-secondary fs-7">Chỉ hỗ trợ file định dạng audio/mpeg</p>
+                            </div>
+                            <input type="file" id="song-mp3" accept="audio/mpeg" class="d-none" required onchange="updateFileName(this, 'mp3-name')">
+                            <div id="mp3-name" class="fs-7 text-success mt-n2 mb-3 fw-bold text-center d-none">Đã chọn file</div>
+                            
+                            <!-- Custom Image Input -->
+                            <div class="custom-file-upload py-4" onclick="document.getElementById('song-cover').click()">
+                                <i class="fa-regular fa-image fs-4 mb-2" style="color: #6c757d;"></i>
+                                <h6 class="fw-bold mb-1 fs-7">Click chọn Ảnh Bìa (Tùy chọn)</h6>
+                                <p class="m-0 text-secondary" style="font-size: 0.7rem;">Kích thước đề xuất: 500x500px</p>
+                            </div>
+                            <input type="file" id="song-cover" accept="image/*" class="d-none" onchange="updateFileName(this, 'cover-name')">
+                            <div id="cover-name" class="fs-7 text-success mt-1 fw-bold text-center d-none">Đã chọn ảnh</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary-custom w-100 mt-auto shadow-lg" id="upload-btn">
+                            <i class="fa-solid fa-arrow-up-from-bracket me-2"></i> XUẤT BẢN FILE
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Song List -->
+            <div class="col-xl-8">
+                <div class="stat-card h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold m-0 opacity-75">Kho nhạc trực tuyến</h4>
+                        <button class="btn btn-sm btn-dark rounded-pill fw-bold px-3 py-2 text-secondary border border-secondary border-opacity-25" onclick="loadAdminSongs()">
+                            <i class="fa-solid fa-rotate-right me-1"></i> LÀM MỚI KHO
+                        </button>
+                    </div>
+                    
+                    <div class="table-responsive pe-2" style="height: 550px; overflow-y: auto;">
+                        <table class="admin-table">
+                            <thead class="sticky-top border-0" style="background: var(--card-bg); z-index: 10;">
+                                <tr>
+                                    <th>#</th>
+                                    <th>TÊN BÀI HÁT</th>
+                                    <th>NGÀY ĐĂNG</th>
+                                    <th>TRẠNG THÁI</th>
+                                    <th class="text-end">TÙY CHỌN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-songs-list">
+                                <!-- JS injected rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast for Notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-4" style="z-index: 1055;">
+        <div id="liveToast" class="toast align-items-center text-bg-success border-0 fs-6 shadow-lg rounded" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+            <div class="d-flex">
+                <div class="toast-body p-3 fw-medium" id="toast-message">Thành công!</div>
+                <button type="button" class="btn-close btn-close-white me-3 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // Check if admin
+        window.onload = async () => {
+            const token = localStorage.getItem('token');
+            if(!token) return window.location.href = 'index.html';
+            
+            try {
+                const user = await api.getProfile();
+                if(user.role !== 'admin') {
+                    alert('Quyền truy cập bị từ chối! Bạn không phải Quản Trị Viên.');
+                    window.location.href = 'index.html';
+                } else {
+                    loadAdminSongs();
+                }
+            } catch(e) {
+                window.location.href = 'index.html';
+            }
+        };
+
+        function showToast(msg, isError=false) {
+            const tEl = document.getElementById('liveToast');
+            document.getElementById('toast-message').textContent = msg;
+            tEl.className = `toast align-items-center text-bg-${isError ? 'danger':'success'} border-0 fs-6 shadow-lg rounded`;
+            new bootstrap.Toast(tEl).show();
+        }
+
+        function updateFileName(input, divId) {
+            const div = document.getElementById(divId);
+            if(input.files && input.files[0]) {
+                div.innerHTML = `<i class="fa-solid fa-check-circle me-1"></i> ${input.files[0].name}`;
+                div.classList.remove('d-none');
+            } else {
+                div.classList.add('d-none');
+            }
+        }
+
+        document.getElementById('uploadSongForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('song-title').value;
+            const mp3 = document.getElementById('song-mp3').files[0];
+            const cover = document.getElementById('song-cover').files[0];
+
+            if(!mp3) return showToast('Vui lòng cung cấp file MP3 gốc!', true);
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('mp3', mp3);
+            if(cover) formData.append('cover', cover);
+
+            const btn = document.getElementById('upload-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> ĐANG XỬ LÝ...';
+
+            try {
+                await api.uploadSong(formData);
+                showToast('Hệ thống đã mã hóa và lưu bài hát thành công!');
+                document.getElementById('uploadSongForm').reset();
+                document.getElementById('mp3-name').classList.add('d-none');
+                document.getElementById('cover-name').classList.add('d-none');
+                loadAdminSongs();
+            } catch(e) {
+                showToast(e.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> XUẤT BẢN FILE';
+            }
+        });
+
+        async function loadAdminSongs() {
+            const tbody = document.getElementById('admin-songs-list');
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div></td></tr>`;
+            try {
+                const songs = await api.getSongs();
+                document.getElementById('stat-songs').textContent = songs.length;
+                tbody.innerHTML = '';
+                
+                if(songs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary py-5 fs-5">Kho nhạc hiện đang trống. Cần thêm dữ liệu ngay!</td></tr>';
+                    return;
+                }
+                
+                songs.forEach((s, idx) => {
+                    const defaultCover = 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?q=80&w=400&fit=crop';
+                    let coverUrl = s.cover_url ? s.cover_url : defaultCover;
+                    if(!coverUrl.startsWith('http')) coverUrl = `http://localhost:3000${coverUrl}`;
+                    
+                    const date = new Date(s.created_at).toLocaleDateString('vi-VN');
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="text-secondary fw-bold">${idx + 1}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="${coverUrl}" class="track-cover-sm shadow-sm" alt="Cover">
+                                <div>
+                                    <h6 class="mb-1 fw-bold fs-6">${s.title}</h6>
+                                    <span class="text-secondary fs-7 opacity-75">${s.artist_name || 'Hệ thống AI đề xuất'}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-secondary opacity-75 fs-7">${date}</td>
+                        <td><span class="badge bg-success bg-opacity-10 text-success border border-success fw-bold px-3 py-1 rounded-pill">Công khai</span></td>
+                        <td class="text-end">
+                            <a href="http://localhost:3000${s.mp3_url}" target="_blank" class="btn btn-sm text-secondary hover-text-white border-0 rounded-circle" style="width: 32px; height: 32px;" title="Nghe thử">
+                                <i class="fa-solid fa-headphones"></i>
+                            </a>
+                            <button class="btn btn-sm text-danger hover-text-white border-0 rounded-circle bg-danger bg-opacity-10 opacity-75 hover-opacity-100" style="width: 32px; height: 32px; transition: 0.2s;" title="Gỡ khỏi Server" onclick="deleteSong(${s.id})">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4 fw-bold">Không thể giao tiếp với CSDL Server</td></tr>';
+            }
+        }
+
+        async function deleteSong(id) {
+            if(confirm('Lưu ý: Hành động này sẽ gỡ bài hát khỏi máy chủ toàn cầu. Bạn có chắc chắn xóa?')) {
+                try {
+                    await api.deleteSong(id);
+                    showToast('Đã xóa dữ liệu bài hát triệt để');
+                    loadAdminSongs();
+                } catch(e) {
+                    showToast(e.message, true);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
