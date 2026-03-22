@@ -180,6 +180,9 @@
             <li class="nav-item">
                 <a href="javascript:void(0)" class="nav-link" onclick="switchTab('members')"><i class="fa-solid fa-users fs-5 me-3" style="width: 24px;"></i> Thành viên</a>
             </li>
+            <li class="nav-item">
+                <a href="javascript:void(0)" class="nav-link" onclick="switchTab('artists')"><i class="fa-solid fa-microphone fs-5 me-3" style="width: 24px;"></i> Nghệ sĩ</a>
+            </li>
             <li class="nav-item mt-4">
                 <a href="#" class="nav-link"><i class="fa-solid fa-gear fs-5 me-3" style="width: 24px;"></i> Cài đặt</a>
             </li>
@@ -348,6 +351,150 @@
                 </div>
             </div>
         </div>
+
+        <div id="tab-artists" class="admin-tab d-none">
+            <div class="stat-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold m-0 opacity-75">Quản lý Nghệ sĩ</h4>
+                    <div>
+                        <button class="btn btn-sm btn-primary-custom rounded-pill fw-bold px-3 py-2 me-2 fs-7" onclick="openAddArtist()" style="padding: 8px 20px;">
+                            <i class="fa-solid fa-plus me-1"></i> THÊM MỚI
+                        </button>
+                        <button class="btn btn-sm btn-dark rounded-pill fw-bold px-3 py-2 text-secondary border border-secondary border-opacity-25" onclick="loadArtists()">
+                            <i class="fa-solid fa-rotate-right me-1"></i> TẢI LẠI
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-responsive pe-2" style="height: 550px; overflow-y: auto;">
+                    <table class="admin-table">
+                        <thead class="sticky-top border-0" style="background: var(--card-bg); z-index: 10;">
+                            <tr>
+                                <th>#</th>
+                                <th>NGHỆ SĨ</th>
+                                <th>SỐ BÀI HÁT</th>
+                                <th>NGÀY THÊM</th>
+                                <th class="text-end">TÙY CHỌN</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-artists-list">
+                            <!-- JS injected rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Artist Modal -->
+    <div class="modal fade" id="addArtistModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: var(--card-bg); color: white; border: 1px solid #404040;">
+                <div class="modal-header border-secondary border-opacity-25 pb-3">
+                    <h5 class="modal-title fw-bold">Thêm Nghệ Sĩ Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body pt-4">
+                    <form id="addArtistForm">
+                        <div class="mb-3">
+                            <label class="form-label text-secondary fw-bold fs-7">Tên nghệ sĩ <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control bg-dark border-0 text-white" id="add-artist-name" style="background: rgba(255,255,255,0.06)!important;" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-secondary fw-bold fs-7">Tiểu sử</label>
+                            <textarea class="form-control bg-dark border-0 text-white" id="add-artist-bio" rows="3" style="background: rgba(255,255,255,0.06)!important;"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-secondary fw-bold fs-7">Ảnh đại diện (Tùy chọn)</label>
+                            <input type="file" class="form-control bg-dark border-0 text-white" id="add-artist-image" accept="image/*" style="background: rgba(255,255,255,0.06)!important;">
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100" id="create-artist-btn">THÊM NGHỆ SĨ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Artist Modal -->
+    <div class="modal fade" id="editArtistModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: var(--card-bg); color: white; border: 1px solid #404040;">
+                <div class="modal-header border-secondary border-opacity-25 pb-3">
+                    <h5 class="modal-title fw-bold">Sửa Thông Tin Nghệ Sĩ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body pt-4">
+                    <form id="editArtistForm">
+                        <input type="hidden" id="edit-artist-id">
+                        <div class="mb-3">
+                            <label class="form-label text-secondary fw-bold fs-7">Tên nghệ sĩ</label>
+                            <input type="text" class="form-control bg-dark border-0 text-white" id="edit-artist-name" style="background: rgba(255,255,255,0.06)!important;" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-secondary fw-bold fs-7">Tiểu sử</label>
+                            <textarea class="form-control bg-dark border-0 text-white" id="edit-artist-bio" rows="3" style="background: rgba(255,255,255,0.06)!important;"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-secondary fw-bold fs-7">Ảnh đại diện mới (Tùy chọn)</label>
+                            <input type="file" class="form-control bg-dark border-0 text-white" id="edit-artist-image" accept="image/*" style="background: rgba(255,255,255,0.06)!important;">
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100" id="save-artist-btn">LƯU THAY ĐỔI</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Artist Songs Modal -->
+    <div class="modal fade" id="viewArtistSongsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="background-color: var(--card-bg); color: white; border: 1px solid #404040;">
+                <div class="modal-header border-secondary border-opacity-25 pb-3">
+                    <h5 class="modal-title fw-bold">Bài Hát Của <span id="view-artist-name-title" class="text-danger"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="p-3 border-bottom border-secondary border-opacity-25 bg-dark" style="background: rgba(0,0,0,0.2)!important;">
+                        <button class="btn btn-sm btn-outline-danger fw-bold rounded-pill w-100" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUploadArtistSong" aria-expanded="false" aria-controls="collapseUploadArtistSong">
+                            <i class="fa-solid fa-plus me-1"></i> THÊM BÀI HÁT CHO NGHỆ SĨ NÀY
+                        </button>
+                        <div class="collapse mt-3" id="collapseUploadArtistSong">
+                            <form id="uploadArtistSongForm" class="p-4 bg-dark rounded border border-secondary border-opacity-25 shadow-sm" style="background: rgba(255,255,255,0.02)!important;">
+                                <div class="mb-3">
+                                    <label class="form-label text-secondary fw-bold fs-7">Tên bài hát <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control rounded px-3 py-2 fw-medium border-0 text-white" id="artist-song-title" placeholder="Nhập tên bài hát..." style="background: rgba(255,255,255,0.06);" required>
+                                </div>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-secondary fw-bold fs-7">Tệp âm thanh (MP3) <span class="text-danger">*</span></label>
+                                        <input type="file" id="artist-song-mp3" accept="audio/mpeg" class="form-control bg-dark border-0 text-white py-2" style="background: rgba(255,255,255,0.06)!important;" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-secondary fw-bold fs-7">Ảnh bìa (Tùy chọn)</label>
+                                        <input type="file" id="artist-song-cover" accept="image/*" class="form-control bg-dark border-0 text-white py-2" style="background: rgba(255,255,255,0.06)!important;">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary-custom w-100 py-2 fs-6 rounded-pill" id="artist-song-upload-btn">TẢI LÊN MÁY CHỦ</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="table-responsive p-3" style="max-height: 400px; overflow-y: auto;">
+                        <table class="admin-table m-0">
+                            <thead class="sticky-top border-0" style="background: var(--card-bg); z-index: 10;">
+                                <tr>
+                                    <th>#</th>
+                                    <th>TÊN BÀI HÁT</th>
+                                    <th class="text-end">LƯỢT NGHE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="artist-songs-list">
+                                <!-- injected rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Toast for Notifications -->
@@ -378,6 +525,7 @@
                     loadAdminStats();
                     loadAdminSongs();
                     loadUsers();
+                    loadArtists();
                 }
             } catch(e) {
                 window.location.href = 'index.html';
@@ -389,7 +537,10 @@
             document.getElementById(`tab-${tabId}`).classList.remove('d-none');
             
             document.querySelectorAll('.admin-sidebar .nav-link').forEach(el => el.classList.remove('active'));
-            const activeIndex = tabId === 'overview' ? 0 : (tabId === 'music' ? 1 : 2);
+            let activeIndex = 0;
+            if(tabId === 'music') activeIndex = 1;
+            else if(tabId === 'members') activeIndex = 2;
+            else if(tabId === 'artists') activeIndex = 3;
             document.querySelectorAll('.admin-sidebar .nav-link')[activeIndex].classList.add('active');
         }
 
@@ -447,6 +598,7 @@
                 document.getElementById('mp3-name').classList.add('d-none');
                 document.getElementById('cover-name').classList.add('d-none');
                 loadAdminSongs();
+                loadArtists();
             } catch(e) {
                 showToast(e.message, true);
             } finally {
@@ -462,15 +614,6 @@
                 const songs = await api.getSongs();
                 document.getElementById('stat-songs').textContent = songs.length;
                 tbody.innerHTML = '';
-                
-                const artistSet = new Set();
-                songs.forEach(s => {
-                    if(s.artist_name) artistSet.add(s.artist_name);
-                });
-                const datalist = document.getElementById('artist-list');
-                if (datalist) {
-                    datalist.innerHTML = Array.from(artistSet).map(name => `<option value="${name}">`).join('');
-                }
                 
                 if(songs.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary py-5 fs-5">Kho nhạc hiện đang trống. Cần thêm dữ liệu ngay!</td></tr>';
@@ -601,6 +744,242 @@
                 }
             }
         }
+
+        // --- Artists Management ---
+        let currentArtists = [];
+
+        function openAddArtist() {
+            document.getElementById('addArtistForm').reset();
+            const modal = new bootstrap.Modal(document.getElementById('addArtistModal'));
+            modal.show();
+        }
+
+        document.getElementById('addArtistForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('add-artist-name').value;
+            const bio = document.getElementById('add-artist-bio').value;
+            const image = document.getElementById('add-artist-image').files[0];
+
+            const formData = new FormData();
+            formData.append('name', name);
+            if(bio) formData.append('bio', bio);
+            if(image) formData.append('profile_image', image);
+
+            const btn = document.getElementById('create-artist-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> ĐANG XỬ LÝ...';
+
+            try {
+                await api.createArtist(formData);
+                showToast('Đã thêm nghệ sĩ mới thành công!');
+                bootstrap.Modal.getInstance(document.getElementById('addArtistModal')).hide();
+                loadArtists();
+            } catch(e) {
+                showToast(e.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'THÊM NGHỆ SĨ';
+            }
+        });
+
+        async function loadArtists() {
+            const tbody = document.getElementById('admin-artists-list');
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div></td></tr>`;
+            try {
+                const artists = await api.getArtists();
+                currentArtists = artists;
+                
+                const datalist = document.getElementById('artist-list');
+                if (datalist) {
+                    datalist.innerHTML = artists.map(a => `<option value="${a.name}">`).join('');
+                }
+                
+                tbody.innerHTML = '';
+                
+                if(artists.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary py-5 fs-5">Chưa có nghệ sĩ nào.</td></tr>';
+                    return;
+                }
+                
+                artists.forEach((a, idx) => {
+                    const defaultCover = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(a.name) + '&background=random&color=fff&size=128';
+                    let coverUrl = a.profile_image_url ? a.profile_image_url : defaultCover;
+                    if(a.profile_image_url && !a.profile_image_url.startsWith('http')) coverUrl = `http://localhost:3000${a.profile_image_url}`;
+                    
+                    const date = new Date(a.created_at).toLocaleDateString('vi-VN');
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="text-secondary fw-bold">${idx + 1}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="${coverUrl}" class="rounded-circle shadow-sm" style="width:48px; height:48px; object-fit:cover;" alt="Avatar">
+                                <div>
+                                    <h6 class="mb-1 fw-bold fs-6">${a.name}</h6>
+                                    <span class="text-secondary fs-7 opacity-75 text-truncate d-inline-block" style="max-width: 200px;">${a.bio || 'Chưa có tiểu sử'}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="fw-bold">${a.total_songs || 0} bài</td>
+                        <td class="text-secondary opacity-75 fs-7">${date}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm text-success hover-text-white border-0 rounded-circle bg-success bg-opacity-10 opacity-75 hover-opacity-100 me-1" style="width: 32px; height: 32px; transition: 0.2s;" title="Xem các bài hát" onclick="openArtistSongs(${a.id}, '${a.name.replace(/'/g, "\\'")}')">
+                                <i class="fa-solid fa-music"></i>
+                            </button>
+                            <button class="btn btn-sm text-primary hover-text-white border-0 rounded-circle bg-primary bg-opacity-10 opacity-75 hover-opacity-100 me-1" style="width: 32px; height: 32px; transition: 0.2s;" title="Sửa thông tin" onclick="openEditArtist(${a.id})">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button class="btn btn-sm text-danger hover-text-white border-0 rounded-circle bg-danger bg-opacity-10 opacity-75 hover-opacity-100" style="width: 32px; height: 32px; transition: 0.2s;" title="Xóa nghệ sĩ" onclick="deleteArtist(${a.id})">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4 fw-bold">Không thể lấy dữ liệu nghệ sĩ</td></tr>';
+            }
+        }
+
+        function openEditArtist(id) {
+            const artist = currentArtists.find(a => a.id === id);
+            if(!artist) return;
+            
+            document.getElementById('edit-artist-id').value = artist.id;
+            document.getElementById('edit-artist-name').value = artist.name;
+            document.getElementById('edit-artist-bio').value = artist.bio || '';
+            document.getElementById('edit-artist-image').value = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('editArtistModal'));
+            modal.show();
+        }
+
+        document.getElementById('editArtistForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-artist-id').value;
+            const name = document.getElementById('edit-artist-name').value;
+            const bio = document.getElementById('edit-artist-bio').value;
+            const image = document.getElementById('edit-artist-image').files[0];
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('bio', bio);
+            if(image) formData.append('profile_image', image);
+
+            const btn = document.getElementById('save-artist-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> ĐANG LƯU...';
+
+            try {
+                await api.updateArtist(id, formData);
+                showToast('Đã cập nhật thông tin nghệ sĩ');
+                bootstrap.Modal.getInstance(document.getElementById('editArtistModal')).hide();
+                loadArtists();
+                loadAdminSongs();
+            } catch(e) {
+                showToast(e.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'LƯU THAY ĐỔI';
+            }
+        });
+
+        async function deleteArtist(id) {
+            if(confirm('Bạn có chắc chắn muốn xóa nghệ sĩ này? Các bài hát của nghệ sĩ vẫn sẽ được giữ lại nhưng không có tên tác giả.')) {
+                try {
+                    await api.deleteArtist(id);
+                    showToast('Đã xóa nghệ sĩ');
+                    loadArtists();
+                } catch(e) {
+                    showToast(e.message, true);
+                }
+            }
+        }
+
+        let currentViewArtistId = null;
+        let currentViewArtistName = null;
+
+        async function openArtistSongs(id, name) {
+            currentViewArtistId = id;
+            currentViewArtistName = name;
+            
+            document.getElementById('view-artist-name-title').textContent = name;
+            const tbody = document.getElementById('artist-songs-list');
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-3"><div class="spinner-border spinner-border-sm text-danger" role="status"></div></td></tr>';
+            
+            // optionally ensure form is reset & hidden
+            document.getElementById('uploadArtistSongForm').reset();
+            const collapseEl = document.getElementById('collapseUploadArtistSong');
+            if(collapseEl && collapseEl.classList.contains('show')) {
+                const bsCollapse = bootstrap.Collapse.getInstance(collapseEl);
+                if(bsCollapse) bsCollapse.hide();
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('viewArtistSongsModal'));
+            modal.show();
+            
+            try {
+                const songs = await api.getArtistSongs(id);
+                tbody.innerHTML = '';
+                
+                if(songs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-secondary py-4">Nghệ sĩ này chưa có bài hát nào</td></tr>';
+                    return;
+                }
+                
+                songs.forEach((s, idx) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="text-secondary fw-bold">${idx + 1}</td>
+                        <td class="fw-bold fs-6">${s.title}</td>
+                        <td class="text-end text-success fw-bold">${s.play_count} <i class="fa-solid fa-play fa-xs ms-1"></i></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger py-4">Lỗi tải bài hát</td></tr>';
+            }
+        }
+
+        document.getElementById('uploadArtistSongForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('artist-song-title').value;
+            const mp3 = document.getElementById('artist-song-mp3').files[0];
+            const cover = document.getElementById('artist-song-cover').files[0];
+
+            if(!mp3) return showToast('Vui lòng cung cấp file MP3!', true);
+            if(!currentViewArtistName) return showToast('Không xác định được nghệ sĩ!', true);
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('artist_name', currentViewArtistName); 
+            formData.append('mp3', mp3);
+            if(cover) formData.append('cover', cover);
+
+            const btn = document.getElementById('artist-song-upload-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> ĐANG TẢI...';
+
+            try {
+                await api.uploadSong(formData);
+                showToast('Đã thêm bài hát cho ' + currentViewArtistName + ' thành công!');
+                document.getElementById('uploadArtistSongForm').reset();
+                const collapseEl = document.getElementById('collapseUploadArtistSong');
+                if(collapseEl) {
+                    const bsCollapse = bootstrap.Collapse.getInstance(collapseEl) || new bootstrap.Collapse(collapseEl, {toggle: false});
+                    bsCollapse.hide();
+                }
+                
+                await loadAdminSongs(); 
+                await loadArtists(); 
+                await openArtistSongs(currentViewArtistId, currentViewArtistName); 
+            } catch(e) {
+                showToast(e.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'TẢI LÊN MÁY CHỦ';
+            }
+        });
     </script>
 </body>
 </html>

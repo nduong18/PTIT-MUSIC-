@@ -50,6 +50,13 @@ const api = {
     addSongToPlaylist: (playlistId, songId) => api.request(`/playlists/${playlistId}/songs`, 'POST', { song_id: songId }, true),
     getPlaylistSongs: (playlistId) => api.request(`/playlists/${playlistId}/songs`, 'GET', null, true),
 
+    // Artists
+    getArtists: () => api.request('/artists', 'GET', null, true),
+    createArtist: (formData) => api.request('/artists', 'POST', formData, true, true),
+    updateArtist: (id, formData) => api.request(`/artists/${id}`, 'PUT', formData, true, true),
+    deleteArtist: (id) => api.request(`/artists/${id}`, 'DELETE', null, true),
+    getArtistSongs: (id) => api.request(`/artists/${id}/songs`, 'GET', null, true),
+
     // Liked Songs
     getLikedSongs: () => api.request('/liked', 'GET', null, true),
     toggleLike: (songId) => api.request(`/liked/${songId}`, 'POST', null, true),
