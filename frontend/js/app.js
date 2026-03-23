@@ -191,9 +191,15 @@ const app = {
         document.getElementById('view-home').classList.add('d-none');
         document.getElementById('view-search').classList.add('d-none');
         document.getElementById('view-library').classList.add('d-none');
+        const viewLeaderboard = document.getElementById('view-leaderboard');
+        if (viewLeaderboard) viewLeaderboard.classList.add('d-none');
 
         if(viewId === 'home') document.getElementById('view-home').classList.remove('d-none');
         if(viewId === 'search') document.getElementById('view-search').classList.remove('d-none');
+        if(viewId === 'leaderboard') {
+            if (viewLeaderboard) viewLeaderboard.classList.remove('d-none');
+            this.renderLeaderboard();
+        }
         if(viewId === 'library' || viewId === 'liked-songs' || viewId.startsWith('playlist-')) {
             document.getElementById('view-library').classList.remove('d-none');
             
@@ -442,6 +448,56 @@ const app = {
               .then(() => this.showToast('Đã thêm bài hát vào playlist'))
               .catch((e) => this.showToast(e.message, true));
         }
+    },
+
+    renderLeaderboard() {
+        const container = document.getElementById('leaderboard-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const sortedSongs = [...this.allSongs].sort((a, b) => (b.play_count || 0) - (a.play_count || 0)).slice(0, 20);
+
+        if (sortedSongs.length === 0) {
+            container.innerHTML = '<p class="text-secondary">Chưa có dữ liệu bảng xếp hạng.</p>';
+            return;
+        }
+
+        sortedSongs.forEach((song, index) => {
+            const defaultCover = 'https://images.unsplash.com/photo-1621360811013-c76831f1f3b0?q=80&w=400&auto=format&fit=crop';
+            let coverUrl = song.cover_url ? song.cover_url : defaultCover;
+            if(!coverUrl.startsWith('http')) coverUrl = `http://localhost:3000${coverUrl}`;
+            let fullSongUrl = song.mp3_url;
+            if(!fullSongUrl.startsWith('http') && fullSongUrl !== '#') fullSongUrl = `http://localhost:3000${fullSongUrl}`;
+
+            const item = document.createElement('div');
+            item.className = 'list-group-item list-group-item-action bg-dark text-white d-flex align-items-center gap-3 border-secondary py-2 px-3 rounded-2 cursor-pointer';
+            item.style.transition = "background-color 0.2s";
+            item.onmouseover = () => item.style.backgroundColor = "rgba(255,255,255,0.1)";
+            item.onmouseout = () => item.style.backgroundColor = "";
+            item.onclick = () => player.playSong(song.id, song.title.replace(/'/g,"\\'").replace(/"/g,"&quot;"), (song.artist_name || 'Various Artists').replace(/'/g,"\\'"), coverUrl, fullSongUrl, index, JSON.stringify(sortedSongs).replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
+            
+            let rankColor = 'text-secondary';
+            if (index === 0) rankColor = 'text-warning'; 
+            else if (index === 1) rankColor = 'text-info'; 
+            else if (index === 2) rankColor = 'text-danger';
+
+            item.innerHTML = `
+                <div class="fw-bold fs-5 ${rankColor}" style="width: 30px; text-align: center;">${index + 1}</div>
+                <img src="${coverUrl}" alt="${song.title}" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;">
+                <div class="flex-grow-1 text-truncate pe-2">
+                    <h6 class="m-0 text-white fw-bold text-truncate">${song.title}</h6>
+                    <small class="text-white-50 text-truncate d-block">${song.artist_name || 'Unknown Artist'}</small>
+                </div>
+                <div class="text-secondary d-flex align-items-center gap-2 me-3">
+                    <i class="fa-solid fa-headphones fa-sm"></i>
+                    <small class="fw-medium">${song.play_count || 0}</small>
+                </div>
+                <button class="btn btn-sm btn-outline-light rounded-circle shadow-sm d-none d-md-block" style="width: 35px; height: 35px; min-width: 35px; border-color: rgba(255,255,255,0.2);">
+                   <i class="fa-solid fa-play" style="margin-left: 2px;"></i>
+                </button>
+            `;
+            container.appendChild(item);
+        });
     }
 };
 
