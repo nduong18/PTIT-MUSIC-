@@ -91,3 +91,58 @@ Server sẽ mặc định chạy trên cổng `3000`.
 - **Giao diện người dùng**: Mở trực tiếp file `frontend/index.html` trên trình duyệt hoặc sử dụng Live Server.
 - **Giao diện quản trị viên**: Mở trực tiếp file `frontend/admin.html` (yêu cầu đăng nhập tài khoản có quyền admin).
 - Nếu frontend đang gọi API thông qua cổng cụ thể, hãy chắc chắn đường dẫn gọi API thống nhất với URL host của Backend (ví dụ `http://localhost:3000`).
+
+## 📡 Danh sách API & Hướng dẫn Postman
+
+Dưới đây là danh sách các API chính của hệ thống để bạn có thể kiểm tra bằng Postman. Tất cả các URL mặc định bắt đầu bằng `http://localhost:3000`.
+
+### 1. Xác thực (Authentication) - `/api/auth`
+| Endpoint | Phương thức | Body (JSON) | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `/register` | **POST** | `{ "username", "email", "password" }` | Đăng ký tài khoản mới |
+| `/login` | **POST** | `{ "username", "password" }` | Đăng nhập và nhận JWT Token |
+| `/me` | **GET** | *Header: Authorization* | Lấy thông tin tài khoản hiện tại |
+
+### 2. Bài hát (Songs) - `/api/songs`
+| Endpoint | Phương thức | Body / Form-data | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `/` | **GET** | Trống | Lấy danh sách tất cả bài hát |
+| `/` | **POST** | `title`, `artist_name`, `mp3` (file), `cover` (file) | Upload bài hát mới (Admin) |
+| `/:id` | **DELETE** | Trống | Xóa bài hát theo ID (Admin) |
+| `/:id/play` | **POST** | Trống | Tăng lượt nghe cho bài hát |
+
+### 3. Playlist (Playlists) - `/api/playlists`
+*(Yêu cầu Header Authorization: Bearer <token>)*
+| Endpoint | Phương thức | Body (JSON) | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `/` | **GET** | Trống | Lấy danh sách playlist của tôi |
+| `/` | **POST** | `{ "name" }` | Tạo playlist mới |
+| `/:id/songs`| **POST** | `{ "song_id" }` | Thêm bài hát vào playlist |
+| `/:id/songs`| **GET** | Trống | Lấy danh sách bài hát trong playlist |
+| `/:id` | **PUT** | `{ "name" }` | Đổi tên playlist |
+| `/:id` | **DELETE** | Trống | Xóa playlist |
+
+### 4. Quản trị (Admin) - `/api/admin`
+*(Yêu cầu Token có quyền Admin)*
+| Endpoint | Phương thức | Body (JSON) | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `/stats` | **GET** | Trống | Lấy thống kê tổng quan hệ thống |
+| `/users` | **GET** | Trống | Lấy danh sách tất cả người dùng |
+| `/users/:id` | **DELETE** | Trống | Xóa người dùng |
+| `/users/:id/role`| **PUT** | `{ "role": "admin" / "user" }` | Cập nhật quyền người dùng |
+
+### 5. Nghệ sĩ & Yêu thích
+- **Artists (`/api/artists`)**: `GET /` (Danh sách), `POST /` (Thêm mới - Admin), `GET /:id/songs` (Biểu diễn bài hát).
+- **Liked (`/api/liked`)**: `GET /` (Danh sách yêu thích), `POST /:id` (Thả tim/Bỏ thích).
+
+---
+
+### 💡 Hướng dẫn Test với Postman
+
+1. **Đăng nhập**: Gọi API `/api/auth/login` để nhận chuỗi `token`.
+2. **Thiết lập Authorization**:
+   - Chọn tab **Authorization** trong Postman.
+   - Chọn **Type**: `Bearer Token`.
+   - Dán chuỗi `token` vừa nhận được vào ô **Token**.
+3. **Thiết lập Header (nếu cần)**: Đảm bảo `Content-Type` là `application/json` đối với các request gửi dữ liệu JSON.
+4. **Đối với Upload file**: Chọn tab **Body** -> **form-data**, sau đó thay đổi kiểu của key (ví dụ `mp3`, `cover`) từ `Text` sang `File`.
