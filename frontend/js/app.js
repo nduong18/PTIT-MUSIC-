@@ -3,6 +3,7 @@ const app = {
     playlists: [],
     allSongs: [],
     currentPlaylistId: null,
+    currentSongToAdd: null,
 
     async init() {
         this.checkAuth();
@@ -438,15 +439,62 @@ const app = {
     },
 
     showAddToPlaylistModal(songId) {
+        this.currentSongToAdd = songId;
+        const listContainer = document.getElementById('addToPlaylist-list');
+        listContainer.innerHTML = '';
+        
         if (this.playlists.length === 0) {
-            this.showToast('Bạn chưa có playlist nào. Hãy tạo playlist trước!', true);
-            return;
+            listContainer.innerHTML = '<p class="text-secondary small m-0">Bạn chưa có playlist nào.</p>';
+        } else {
+            this.playlists.forEach(pl => {
+                const item = document.createElement('div');
+                item.className = 'list-group-item list-group-item-action bg-dark text-white d-flex justify-content-between align-items-center border-secondary rounded-2 cursor-pointer py-2 px-3 mb-1';
+                item.style.transition = "background-color 0.2s";
+                item.onmouseover = () => item.style.backgroundColor = "rgba(255,255,255,0.1)";
+                item.onmouseout = () => item.style.backgroundColor = "";
+                item.innerHTML = `
+                    <span class="text-truncate flex-grow-1"><i class="fa-solid fa-music text-secondary me-2"></i> ${pl.name}</span>
+                    <button class="btn btn-sm btn-outline-light rounded-pill px-3 ms-2" onclick="event.stopPropagation(); app.addCurrentSongToPlaylist(${pl.id})">Thêm</button>
+                `;
+                item.onclick = () => app.addCurrentSongToPlaylist(pl.id);
+                listContainer.appendChild(item);
+            });
         }
-        const plName = prompt(`Nhập ID của Playlist bạn muốn thêm vào:\n${this.playlists.map(p => p.id + ' - ' + p.name).join('\n')}`);
-        if(plName) {
-            api.addSongToPlaylist(plName, songId)
-              .then(() => this.showToast('Đã thêm bài hát vào playlist'))
-              .catch((e) => this.showToast(e.message, true));
+        
+        document.getElementById('new-playlist-name-input').value = '';
+        new bootstrap.Modal(document.getElementById('addToPlaylistModal')).show();
+    },
+
+    async addCurrentSongToPlaylist(playlistId) {
+        if (!this.currentSongToAdd) return;
+        try {
+            await api.addSongToPlaylist(playlistId, this.currentSongToAdd);
+            this.showToast('Đã thêm bài hát vào playlist');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addToPlaylistModal'));
+            if(modal) modal.hide();
+        } catch(e) {
+            this.showToast('Lỗi thêm bài hát: ' + e.message, true);
+        }
+    },
+
+    async createPlaylistAndAddSong(event) {
+        event.preventDefault();
+        if (!this.currentSongToAdd) return;
+        
+        const nameInput = document.getElementById('new-playlist-name-input');
+        const name = nameInput.value.trim();
+        if (name) {
+            try {
+                const result = await api.createPlaylist(name);
+                await api.addSongToPlaylist(result.id, this.currentSongToAdd);
+                this.showToast('Đã tạo playlist và thêm bài hát!');
+                this.loadPlaylists(); // Refresh playlist sidebar
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addToPlaylistModal'));
+                if(modal) modal.hide();
+                nameInput.value = '';
+            } catch(e) {
+                this.showToast('Lỗi: ' + e.message, true);
+            }
         }
     },
 

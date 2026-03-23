@@ -180,13 +180,10 @@
                 <a href="javascript:void(0)" class="nav-link" onclick="switchTab('music')"><i class="fa-solid fa-music fs-5 me-3" style="width: 24px;"></i> Kho Âm nhạc</a>
             </li>
             <li class="nav-item">
-                <a href="javascript:void(0)" class="nav-link" onclick="switchTab('members')"><i class="fa-solid fa-users fs-5 me-3" style="width: 24px;"></i> Thành viên</a>
-            </li>
-            <li class="nav-item">
                 <a href="javascript:void(0)" class="nav-link" onclick="switchTab('artists')"><i class="fa-solid fa-microphone fs-5 me-3" style="width: 24px;"></i> Nghệ sĩ</a>
             </li>
-            <li class="nav-item mt-4">
-                <a href="#" class="nav-link"><i class="fa-solid fa-gear fs-5 me-3" style="width: 24px;"></i> Cài đặt</a>
+            <li class="nav-item">
+                <a href="javascript:void(0)" class="nav-link" onclick="switchTab('members')"><i class="fa-solid fa-users fs-5 me-3" style="width: 24px;"></i> Thành viên</a>
             </li>
         </ul>
         
@@ -207,10 +204,6 @@
     <div class="admin-main">
         <div class="d-flex justify-content-between align-items-center mb-5">
             <h2 class="fw-bold m-0" style="font-size: 2rem;">Admin Dashboard</h2>
-            <div class="position-relative" style="width: 300px;">
-                <i class="fa-solid fa-magnifying-glass position-absolute text-secondary" style="top:50%; transform:translateY(-50%); left:16px;"></i>
-                <input type="text" class="form-control rounded-pill bg-dark border-0 text-white ps-5 py-2 fw-medium" placeholder="Tìm kiếm bài hát, ca sĩ..." style="background: rgba(255,255,255,0.1)!important;">
-            </div>
         </div>
 
         <!-- Tab Content Container -->
@@ -574,8 +567,8 @@
             document.querySelectorAll('.admin-sidebar .nav-link').forEach(el => el.classList.remove('active'));
             let activeIndex = 0;
             if(tabId === 'music') activeIndex = 1;
-            else if(tabId === 'members') activeIndex = 2;
-            else if(tabId === 'artists') activeIndex = 3;
+            else if(tabId === 'artists') activeIndex = 2;
+            else if(tabId === 'members') activeIndex = 3;
             document.querySelectorAll('.admin-sidebar .nav-link')[activeIndex].classList.add('active');
         }
 
@@ -840,6 +833,13 @@
                     return;
                 }
                 
+                // Sort users: admins first
+                users.sort((a, b) => {
+                    if (a.role === 'admin' && b.role !== 'admin') return -1;
+                    if (a.role !== 'admin' && b.role === 'admin') return 1;
+                    return 0;
+                });
+                
                 users.forEach((u, idx) => {
                     const date = new Date(u.created_at).toLocaleDateString('vi-VN');
                     const isCurrentUser = typeof app !== 'undefined' && app.currentUser && app.currentUser.id === u.id;
@@ -864,9 +864,6 @@
                         <td class="text-secondary opacity-75 fs-7">${date}</td>
                         <td>${roleBadge}</td>
                         <td class="text-end">
-                            <button class="btn btn-sm text-primary hover-text-white border-0 rounded-circle bg-primary bg-opacity-10 opacity-75 hover-opacity-100" style="width: 32px; height: 32px; transition: 0.2s; margin-right: 5px;" title="Cấp/Hạ Quyền" onclick="toggleRole(${u.id}, '${nextRole}')">
-                                <i class="fa-solid fa-user-shield"></i>
-                            </button>
                             <button class="btn btn-sm text-danger hover-text-white border-0 rounded-circle bg-danger bg-opacity-10 opacity-75 hover-opacity-100" style="width: 32px; height: 32px; transition: 0.2s;" title="Xóa tài khoản" onclick="deleteUser(${u.id})">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>

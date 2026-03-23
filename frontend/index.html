@@ -303,6 +303,37 @@
       </div>
     </div>
 
+    <!-- Add to Playlist Modal -->
+    <div class="modal fade" id="addToPlaylistModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content border-0 p-4 shadow-lg" style="background: linear-gradient(to bottom, #2a2a2a, #121212); border-radius: 12px;">
+          <div class="d-flex justify-content-between align-items-center border-0 mb-3">
+             <h4 class="fw-bold text-white m-0">Thêm vào playlist</h4>
+             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          
+          <div class="mb-4">
+              <h6 class="text-white-50 mb-3">Chọn playlist có sẵn</h6>
+              <div id="addToPlaylist-list" class="list-group bg-transparent d-flex flex-column gap-2" style="max-height: 200px; overflow-y: auto;">
+                  <!-- Populated via JS -->
+              </div>
+          </div>
+          
+          <hr class="border-secondary opacity-25 my-3">
+          
+          <div>
+              <h6 class="text-white-50 mb-3">Hoặc tạo playlist mới</h6>
+              <form id="createAndAddPlaylistForm" onsubmit="app.createPlaylistAndAddSong(event)">
+                  <div class="mb-3">
+                      <input type="text" class="form-control p-2 rounded-3 text-white fw-medium auth-input" id="new-playlist-name-input" required placeholder="Tên playlist mới..." style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);">
+                  </div>
+                  <button type="submit" class="btn btn-primary-custom w-100 fw-bold shadow-sm py-2" style="border-radius: 50px;">Tạo & Thêm bài hát</button>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast-container position-fixed bottom-0 center start-50 translate-middle-x p-3 mb-5" style="z-index: 1100">
         <div id="liveToast" class="toast align-items-center text-bg-success border-0 px-3 py-1 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
