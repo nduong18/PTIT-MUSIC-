@@ -9,9 +9,7 @@ const app = {
         this.checkAuth();
         await this.loadHomeSongs();
         
-        document.getElementById('audio-element').addEventListener('ended', () => {
-             player.next();
-        });
+        // ended listener is now handled exclusively in player.js
     },
 
     showToast(message, isError = false) {

@@ -4,6 +4,26 @@ const player = {
     queue: [],
     currentIndex: -1,
     isPlaying: false,
+    isShuffle: false,
+    isRepeat: false,
+
+    toggleShuffle() {
+        this.isShuffle = !this.isShuffle;
+        const btn = document.getElementById('player-shuffle-btn');
+        if (btn) {
+            if (this.isShuffle) btn.classList.add('text-primary');
+            else btn.classList.remove('text-primary');
+        }
+    },
+
+    toggleRepeat() {
+        this.isRepeat = !this.isRepeat;
+        const btn = document.getElementById('player-repeat-btn');
+        if (btn) {
+            if (this.isRepeat) btn.classList.add('text-primary');
+            else btn.classList.remove('text-primary');
+        }
+    },
 
     playSong(id, title, artist, coverUrl, mp3Url, indexInQueue = 0, queueContext = []) {
         if (!app.currentUser) {
@@ -60,8 +80,26 @@ const player = {
     },
 
     next() {
-        if (this.queue.length > 0 && this.currentIndex < this.queue.length - 1) {
-            const nextIdx = this.currentIndex + 1;
+        if (this.queue.length > 0) {
+            let nextIdx;
+            if (this.isShuffle && this.queue.length > 1) {
+                do {
+                    nextIdx = Math.floor(Math.random() * this.queue.length);
+                } while (nextIdx === this.currentIndex);
+            } else {
+                nextIdx = this.currentIndex + 1;
+                if (nextIdx >= this.queue.length) {
+                    if (this.isRepeat) {
+                        nextIdx = 0;
+                    } else {
+                        this.audio.pause();
+                        this.isPlaying = false;
+                        this.updatePlayBtnUI();
+                        return;
+                    }
+                }
+            }
+            
             const song = this.queue[nextIdx];
             
             const coverUrl = song.cover_url ? `http://localhost:3000${song.cover_url}` : 'https://images.unsplash.com/photo-1621360811013-c76831f1f3b0?q=80&w=400&auto=format&fit=crop';
@@ -77,8 +115,23 @@ const player = {
             return;
         }
 
-        if (this.queue.length > 0 && this.currentIndex > 0) {
-            const prevIdx = this.currentIndex - 1;
+        if (this.queue.length > 0) {
+            let prevIdx;
+            if (this.isShuffle && this.queue.length > 1) {
+                do {
+                    prevIdx = Math.floor(Math.random() * this.queue.length);
+                } while (prevIdx === this.currentIndex);
+            } else {
+                prevIdx = this.currentIndex - 1;
+                if (prevIdx < 0) {
+                    if (this.isRepeat) {
+                        prevIdx = this.queue.length - 1;
+                    } else {
+                        this.audio.currentTime = 0;
+                        return;
+                    }
+                }
+            }
             const song = this.queue[prevIdx];
             
             const coverUrl = song.cover_url ? `http://localhost:3000${song.cover_url}` : 'https://images.unsplash.com/photo-1621360811013-c76831f1f3b0?q=80&w=400&auto=format&fit=crop';
@@ -128,6 +181,15 @@ player.audio.addEventListener('timeupdate', () => {
 
 document.getElementById('player-volume').addEventListener('input', (e) => {
     player.audio.volume = e.target.value;
+});
+
+player.audio.addEventListener('ended', () => {
+    if (player.isRepeat) {
+        player.audio.currentTime = 0;
+        player.audio.play();
+    } else {
+        player.next();
+    }
 });
 
 function formatTime(seconds) {

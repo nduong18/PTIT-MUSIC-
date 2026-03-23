@@ -128,9 +128,9 @@
 
             <!-- VIEW: SEARCH -->
             <div id="view-search" class="d-none px-4 py-3">
-                <div class="position-relative mb-5" style="max-width: 400px; margin-top: -90px; z-index: 1000; margin-left: 120px;">
+                <div class="position-relative mb-5" style="max-width: 400px; margin-top: -70px; z-index: 1000; margin-left: 120px;">
                     <i class="fa-solid fa-magnifying-glass position-absolute text-dark" style="left: 16px; top: 50%; transform:translateY(-50%); font-size:1.1rem;"></i>
-                    <input type="text" class="form-control rounded-pill border-0 text-dark fw-medium py-3 ps-5 shadow-lg" id="search-input" placeholder="Bạn muốn nghe gì?" onkeyup="app.handleSearch()" style="background: white;">
+                    <input type="text" class="form-control rounded-pill border-0 text-dark fw-medium py-2 ps-5 shadow-lg" id="search-input" placeholder="Bạn muốn nghe gì?" onkeyup="app.handleSearch()" style="background: white;">
                 </div>
                 <h4 class="fw-bold mb-4">Kết quả tìm kiếm</h4>
                 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4" id="search-results-container">
@@ -185,11 +185,11 @@
         </div>
         <div class="player-center">
             <div class="player-controls">
-                <button class="control-btn" title="Kéo trộn"><i class="fa-solid fa-shuffle"></i></button>
+                <button class="control-btn" id="player-shuffle-btn" onclick="player.toggleShuffle()" title="Kéo trộn"><i class="fa-solid fa-shuffle"></i></button>
                 <button class="control-btn" onclick="player.prev()"><i class="fa-solid fa-backward-step"></i></button>
                 <button class="play-btn shadow" onclick="player.togglePlay()" id="player-play-btn"><i class="fa-solid fa-play" style="margin-left:2px;"></i></button>
                 <button class="control-btn" onclick="player.next()"><i class="fa-solid fa-forward-step"></i></button>
-                <button class="control-btn" title="Lặp lại"><i class="fa-solid fa-repeat"></i></button>
+                <button class="control-btn" id="player-repeat-btn" onclick="player.toggleRepeat()" title="Lặp lại"><i class="fa-solid fa-repeat"></i></button>
             </div>
             <div class="progress-container w-100">
                 <span id="player-time-current">0:00</span>
