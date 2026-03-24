@@ -92,57 +92,147 @@ Server sẽ mặc định chạy trên cổng `3000`.
 - **Giao diện quản trị viên**: Mở trực tiếp file `frontend/admin.html` (yêu cầu đăng nhập tài khoản có quyền admin).
 - Nếu frontend đang gọi API thông qua cổng cụ thể, hãy chắc chắn đường dẫn gọi API thống nhất với URL host của Backend (ví dụ `http://localhost:3000`).
 
-## 📡 Danh sách API & Hướng dẫn Postman
+## 📡 Chi tiết API Endpoints & Hướng dẫn Test Postman
 
-Dưới đây là danh sách các API chính của hệ thống để bạn có thể kiểm tra bằng Postman. Tất cả các URL mặc định bắt đầu bằng `http://localhost:3000`.
+Để hỗ trợ việc kiểm thử (test) bằng Postman, dưới đây là chi tiết từng cụm API với định dạng dữ liệu cụ thể.
 
-### 1. Xác thực (Authentication) - `/api/auth`
-| Endpoint | Phương thức | Body (JSON) | Mô tả |
-| :--- | :--- | :--- | :--- |
-| `/register` | **POST** | `{ "username", "email", "password" }` | Đăng ký tài khoản mới |
-| `/login` | **POST** | `{ "username", "password" }` | Đăng nhập và nhận JWT Token |
-| `/me` | **GET** | *Header: Authorization* | Lấy thông tin tài khoản hiện tại |
+### 1. Hệ thống Xác thực (Authentication)
+**Base URL:** `http://localhost:3000/api/auth`
 
-### 2. Bài hát (Songs) - `/api/songs`
-| Endpoint | Phương thức | Body / Form-data | Mô tả |
-| :--- | :--- | :--- | :--- |
-| `/` | **GET** | Trống | Lấy danh sách tất cả bài hát |
-| `/` | **POST** | `title`, `artist_name`, `mp3` (file), `cover` (file) | Upload bài hát mới (Admin) |
-| `/:id` | **DELETE** | Trống | Xóa bài hát theo ID (Admin) |
-| `/:id/play` | **POST** | Trống | Tăng lượt nghe cho bài hát |
+#### 📝 Đăng ký tài khoản
+- **URL:** `http://localhost:3000/api/auth/register`
+- **Method:** `POST`
+- **Body (JSON):**
+```json
+{
+  "username": "testuser",
+  "email": "test@gmail.com",
+  "password": "123"
+}
+```
 
-### 3. Playlist (Playlists) - `/api/playlists`
-*(Yêu cầu Header Authorization: Bearer <token>)*
-| Endpoint | Phương thức | Body (JSON) | Mô tả |
-| :--- | :--- | :--- | :--- |
-| `/` | **GET** | Trống | Lấy danh sách playlist của tôi |
-| `/` | **POST** | `{ "name" }` | Tạo playlist mới |
-| `/:id/songs`| **POST** | `{ "song_id" }` | Thêm bài hát vào playlist |
-| `/:id/songs`| **GET** | Trống | Lấy danh sách bài hát trong playlist |
-| `/:id` | **PUT** | `{ "name" }` | Đổi tên playlist |
-| `/:id` | **DELETE** | Trống | Xóa playlist |
+#### 🔑 Đăng nhập
+- **URL:** `http://localhost:3000/api/auth/login`
+- **Method:** `POST`
+- **Body (JSON):**
+```json
+{
+  "username": "testuser",
+  "password": "123"
+}
+```
+*=> Sau khi đăng nhập, copy chuỗi `token` trong phản hồi để sử dụng cho các API sau.*
 
-### 4. Quản trị (Admin) - `/api/admin`
-*(Yêu cầu Token có quyền Admin)*
-| Endpoint | Phương thức | Body (JSON) | Mô tả |
-| :--- | :--- | :--- | :--- |
-| `/stats` | **GET** | Trống | Lấy thống kê tổng quan hệ thống |
-| `/users` | **GET** | Trống | Lấy danh sách tất cả người dùng |
-| `/users/:id` | **DELETE** | Trống | Xóa người dùng |
-| `/users/:id/role`| **PUT** | `{ "role": "admin" / "user" }` | Cập nhật quyền người dùng |
-
-### 5. Nghệ sĩ & Yêu thích
-- **Artists (`/api/artists`)**: `GET /` (Danh sách), `POST /` (Thêm mới - Admin), `GET /:id/songs` (Biểu diễn bài hát).
-- **Liked (`/api/liked`)**: `GET /` (Danh sách yêu thích), `POST /:id` (Thả tim/Bỏ thích).
+#### 👤 Thông tin cá nhân (Cần Token)
+- **URL:** `http://localhost:3000/api/auth/me`
+- **Method:** `GET`
+- **Header:** `Authorization: Bearer <token>`
 
 ---
 
-### 💡 Hướng dẫn Test với Postman
+### 2. Quản lý Bài hát (Songs)
+**Base URL:** `http://localhost:3000/api/songs`
 
-1. **Đăng nhập**: Gọi API `/api/auth/login` để nhận chuỗi `token`.
-2. **Thiết lập Authorization**:
-   - Chọn tab **Authorization** trong Postman.
-   - Chọn **Type**: `Bearer Token`.
-   - Dán chuỗi `token` vừa nhận được vào ô **Token**.
-3. **Thiết lập Header (nếu cần)**: Đảm bảo `Content-Type` là `application/json` đối với các request gửi dữ liệu JSON.
-4. **Đối với Upload file**: Chọn tab **Body** -> **form-data**, sau đó thay đổi kiểu của key (ví dụ `mp3`, `cover`) từ `Text` sang `File`.
+#### 🎵 Lấy tất cả bài hát
+- **URL:** `http://localhost:3000/api/songs`
+- **Method:** `GET`
+
+#### 📤 Upload bài hát (Admin Only - Cần Token)
+- **URL:** `http://localhost:3000/api/songs`
+- **Method:** `POST`
+- **Header:** `Authorization: Bearer <admin_token>`
+- **Body (form-data):**
+  - `title`: (Text) - "Tên bài hát"
+  - `artist_name`: (Text) - "Tên nghệ sĩ"
+  - `mp3`: (File) - [Chọn file .mp3]
+  - `cover`: (File) - [Chọn file ảnh .jpg/.png]
+
+#### 📈 Tăng lượt nghe
+- **URL:** `http://localhost:3000/api/songs/{id}/play` (Ví dụ: `.../songs/1/play`)
+- **Method:** `POST`
+
+#### 🗑️ Xóa bài hát (Admin Only - Cần Token)
+- **URL:** `http://localhost:3000/api/songs/{id}`
+- **Method:** `DELETE`
+- **Header:** `Authorization: Bearer <admin_token>`
+
+---
+
+### 3. Quản lý Playlist
+**Base URL:** `http://localhost:3000/api/playlists`
+*(Tất cả API playlist đều yêu cầu Header: Authorization: Bearer <token>)*
+
+#### 📂 Lấy danh sách playlist của tôi
+- **URL:** `http://localhost:3000/api/playlists`
+- **Method:** `GET`
+
+#### ➕ Tạo playlist mới
+- **URL:** `http://localhost:3000/api/playlists`
+- **Method:** `POST`
+- **Body (JSON):**
+```json
+{
+  "name": "Nhạc EDM 2024"
+}
+```
+
+#### 🔗 Thêm bài hát vào playlist
+- **URL:** `http://localhost:3000/api/playlists/{playlist_id}/songs`
+- **Method:** `POST`
+- **Body (JSON):**
+```json
+{
+  "song_id": 5
+}
+```
+
+#### 🎶 Lấy bài hát trong playlist
+- **URL:** `http://localhost:3000/api/playlists/{id}/songs`
+- **Method:** `GET`
+
+#### ✏️ Đổi tên playlist
+- **URL:** `http://localhost:3000/api/playlists/{id}`
+- **Method:** `PUT`
+- **Body (JSON):**
+```json
+{
+  "name": "Nhạc Chill Mỗi Ngày"
+}
+```
+
+---
+
+### 4. Quản trị viên (Admin Statistics & Users)
+**Base URL:** `http://localhost:3000/api/admin`
+
+#### 📊 Thống kê tổng quan
+- **URL:** `http://localhost:3000/api/admin/stats`
+- **Method:** `GET`
+
+#### 👥 Danh sách người dùng
+- **URL:** `http://localhost:3000/api/admin/users`
+- **Method:** `GET`
+
+#### 🛠️ Cập nhật quyền (Role)
+- **URL:** `http://localhost:3000/api/admin/users/{id}/role`
+- **Method:** `PUT`
+- **Body (JSON):**
+```json
+{
+  "role": "admin"
+}
+```
+
+---
+
+### 5. Nghệ sĩ & Yêu thích
+- **Lấy danh sách nghệ sĩ**: `GET http://localhost:3000/api/artists`
+- **Thêm nghệ sĩ (Admin)**: `POST http://localhost:3000/api/artists` (form-data: `name`, `bio`, `profile_image`)
+- **Yêu thích bài hát**: `POST http://localhost:3000/api/liked/{song_id}` (Cần Token)
+- **Xem danh sách yêu thích**: `GET http://localhost:3000/api/liked` (Cần Token)
+
+---
+
+### 💡 Mẹo Postman:
+1. Bạn có thể tạo **Environment** trong Postman, đặt biến `base_url` là `http://localhost:3000` và `token` để tái sử dụng trong các request bằng cách dùng `{{base_url}}` và `{{token}}`.
+2. Đối với các API yêu cầu **Bearer Token**, hãy vào tab **Auth** -> chọn **Bearer Token** và dán token của bạn vào (đừng quên tiền tố `Bearer ` nếu bạn gán trực tiếp vào Header).
