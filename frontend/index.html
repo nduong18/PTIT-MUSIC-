@@ -81,15 +81,21 @@
                     <button class="btn btn-light fw-bold rounded-pill border-0 guest-only px-4 py-2 fs-7" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</button>
                     
                     <div class="dropdown auth-only d-none">
-                        <button class="btn btn-dark rounded-pill dropdown-toggle d-flex align-items-center gap-2 border-0 shadow-sm" type="button" data-bs-toggle="dropdown" style="background: rgba(0,0,0,0.5); padding: 4px 12px 4px 4px;">
+                        <button class="btn btn-dark rounded-pill dropdown-toggle d-flex align-items-center gap-2 border-0 shadow-sm user-dropdown-btn" type="button" data-bs-toggle="dropdown">
                             <img src="https://ui-avatars.com/api/?name=User&background=random" class="rounded-circle" width="28" height="28">
                             <span id="user-display-name-top" class="fw-bold fs-7 text-white">User</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="background: #282828;">
-                            <li><a class="dropdown-item fw-bold text-white py-2" href="#">Hồ sơ</a></li>
-                            <li class="admin-only d-none"><a class="dropdown-item fw-bold text-danger py-2" href="admin.html">Trang Quản Trị <i class="fa-solid fa-arrow-up-right-from-square ms-1 fa-xs"></i></a></li>
-                            <li><hr class="dropdown-divider" style="border-color: #404040;"></li>
-                            <li><a class="dropdown-item" href="#" onclick="app.logout()">Đăng xuất</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 user-dropdown-menu">
+                            <li class="admin-only d-none">
+                                <a class="dropdown-item user-dropdown-item text-danger" href="admin.html">
+                                    Trang Quản Trị <i class="fa-solid fa-gauge-high"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item user-dropdown-item" href="#" onclick="app.logout()">
+                                    Đăng xuất <i class="fa-solid fa-right-from-bracket"></i>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>

@@ -539,6 +539,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/api.js"></script>
     <script>
+        let adminUser = null;
         // Check if admin
         window.onload = async () => {
             const token = localStorage.getItem('token');
@@ -546,6 +547,7 @@
             
             try {
                 const user = await api.getProfile();
+                adminUser = user;
                 if(user.role !== 'admin') {
                     alert('Quyền truy cập bị từ chối! Bạn không phải Quản Trị Viên.');
                     window.location.href = 'index.html';
@@ -842,7 +844,7 @@
                 
                 users.forEach((u, idx) => {
                     const date = new Date(u.created_at).toLocaleDateString('vi-VN');
-                    const isCurrentUser = typeof app !== 'undefined' && app.currentUser && app.currentUser.id === u.id;
+                    const isCurrentUser = adminUser && adminUser.id === u.id;
                     const roleBadge = u.role === 'admin' 
                         ? `<span class="badge bg-danger bg-opacity-25 text-danger border border-danger fw-bold px-3 py-1 rounded-pill">Quản trị</span>`
                         : `<span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary fw-bold px-3 py-1 rounded-pill">Người dùng</span>`;
@@ -864,9 +866,11 @@
                         <td class="text-secondary opacity-75 fs-7">${date}</td>
                         <td>${roleBadge}</td>
                         <td class="text-end">
+                            ${!isCurrentUser ? `
                             <button class="btn btn-sm text-danger hover-text-white border-0 rounded-circle bg-danger bg-opacity-10 opacity-75 hover-opacity-100" style="width: 32px; height: 32px; transition: 0.2s;" title="Xóa tài khoản" onclick="deleteUser(${u.id})">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
+                            ` : '<span class="text-secondary fs-7 italic">Chính bạn</span>'}
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -888,7 +892,7 @@
             }
         }
 
-        async function deleteUserDb(id) {
+        async function deleteUser(id) {
             if(confirm('Cảnh báo: Hành động này sẽ xóa hoàn toàn cả danh sách nhạc của người dùng. Tiếp tục?')) {
                 try {
                     await api.deleteUser(id);
