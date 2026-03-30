@@ -21,14 +21,29 @@ const upload = multer({ storage: storage });
 // Get all songs (Public)
 router.get('/', async (req, res) => {
     try {
-        const [songs] = await pool.query(`
+        const page = req.query.page ? parseInt(req.query.page) : null;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+
+        let query = `
             SELECT s.id, s.title, s.mp3_url, s.cover_url, s.duration, s.play_count, s.created_at, 
                    a.id as artist_id, a.name as artist_name 
             FROM songs s 
             LEFT JOIN artists a ON s.artist_id = a.id
             ORDER BY s.created_at DESC
-        `);
-        res.json(songs);
+        `;
+
+        if (page !== null) {
+            const offset = (page - 1) * limit;
+            const [[{ totalItems }]] = await pool.query('SELECT COUNT(*) as totalItems FROM songs');
+            const [songs] = await pool.query(query + ` LIMIT ? OFFSET ?`, [limit, offset]);
+            res.json({
+                data: songs,
+                pagination: { currentPage: page, limit, totalItems, totalPages: Math.ceil(totalItems / limit) }
+            });
+        } else {
+            const [songs] = await pool.query(query);
+            res.json(songs);
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error fetching songs" });
@@ -38,22 +53,36 @@ router.get('/', async (req, res) => {
 // Search songs (Public)
 router.get('/search', async (req, res) => {
     try {
-        const query = req.query.q || '';
-        if (!query.trim()) {
+        const queryStr = req.query.q || '';
+        if (!queryStr.trim()) {
             return res.json([]);
         }
 
-        const searchTerm = `%${query}%`;
-        const [songs] = await pool.query(`
+        const searchTerm = `%${queryStr}%`;
+        const page = req.query.page ? parseInt(req.query.page) : null;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+
+        let query = `
             SELECT s.id, s.title, s.mp3_url, s.cover_url, s.duration, s.play_count, s.created_at, 
                    a.id as artist_id, a.name as artist_name 
             FROM songs s 
             LEFT JOIN artists a ON s.artist_id = a.id
             WHERE s.title LIKE ? OR a.name LIKE ?
             ORDER BY s.created_at DESC
-        `, [searchTerm, searchTerm]);
-        
-        res.json(songs);
+        `;
+
+        if (page !== null) {
+            const offset = (page - 1) * limit;
+            const [[{ totalItems }]] = await pool.query('SELECT COUNT(*) as totalItems FROM songs s LEFT JOIN artists a ON s.artist_id = a.id WHERE s.title LIKE ? OR a.name LIKE ?', [searchTerm, searchTerm]);
+            const [songs] = await pool.query(query + ` LIMIT ? OFFSET ?`, [searchTerm, searchTerm, limit, offset]);
+            res.json({
+                data: songs,
+                pagination: { currentPage: page, limit, totalItems, totalPages: Math.ceil(totalItems / limit) }
+            });
+        } else {
+            const [songs] = await pool.query(query, [searchTerm, searchTerm]);
+            res.json(songs);
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error searching songs" });

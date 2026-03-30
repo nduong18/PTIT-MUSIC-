@@ -346,6 +346,8 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- Pagination container -->
+                    <div id="admin-songs-pagination" class="d-flex justify-content-center mt-3 pb-2 gap-2"></div>
                     </div>
                 </div>
             </div>
@@ -376,6 +378,8 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination container -->
+                <div id="admin-users-pagination" class="d-flex justify-content-center mt-3 pb-2 gap-2"></div>
             </div>
         </div>
 
@@ -409,6 +413,8 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination container -->
+                <div id="admin-artists-pagination" class="d-flex justify-content-center mt-3 pb-2 gap-2"></div>
             </div>
         </div>
     </div>
@@ -519,6 +525,8 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- Pagination container -->
+                    <div id="admin-artist-songs-pagination" class="d-flex justify-content-center pt-3 pb-3 gap-2 bg-dark border-top border-secondary border-opacity-25" style="margin-top: -1px;"></div>
                 </div>
             </div>
         </div>
@@ -540,6 +548,44 @@
     <script src="js/api.js"></script>
     <script>
         let adminUser = null;
+        let currentSongPage = 1;
+        let currentUserPage = 1;
+        let currentArtistPage = 1;
+        let currentArtistSongPage = 1;
+        const ITEMS_PER_PAGE = 5;
+        
+        function renderAdminPagination(containerId, paginationObj, loadFunctionStr) {
+            const container = document.getElementById(containerId);
+            if(!container) return;
+            container.innerHTML = '';
+            if(!paginationObj || paginationObj.totalPages <= 1) return;
+
+            const { currentPage, totalPages } = paginationObj;
+            let html = '';
+
+            const getClickStr = (p) => loadFunctionStr.includes('[PAGE]') ? loadFunctionStr.replace(/\[PAGE\]/g, p) : `${loadFunctionStr}(${p})`;
+
+            const prevDisabled = currentPage === 1 ? 'disabled' : '';
+            html += `<button class="btn btn-sm btn-outline-secondary rounded ${prevDisabled}" onclick="${getClickStr(currentPage - 1)}"><i class="fa-solid fa-chevron-left"></i></button>`;
+
+            for(let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    if (i === currentPage) {
+                        html += `<button class="btn btn-sm btn-danger rounded" onclick="${getClickStr(i)}">${i}</button>`;
+                    } else {
+                        html += `<button class="btn btn-sm btn-outline-secondary rounded" onclick="${getClickStr(i)}">${i}</button>`;
+                    }
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += `<span class="text-secondary align-self-center">...</span>`;
+                }
+            }
+
+            const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+            html += `<button class="btn btn-sm btn-outline-secondary rounded ${nextDisabled}" onclick="${getClickStr(currentPage + 1)}"><i class="fa-solid fa-chevron-right"></i></button>`;
+
+            container.innerHTML = html;
+        }
+
         // Check if admin
         window.onload = async () => {
             const token = localStorage.getItem('token');
@@ -761,12 +807,23 @@
             }
         });
 
-        async function loadAdminSongs() {
+        async function loadAdminSongs(page = 1) {
+            currentSongPage = page;
             const tbody = document.getElementById('admin-songs-list');
             tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div></td></tr>`;
             try {
-                const songs = await api.getSongs();
-                document.getElementById('stat-songs').textContent = songs.length;
+                const response = await api.getSongs(page, ITEMS_PER_PAGE);
+                const songs = response.data || response; // Fallback in case API is not returning paginated yet
+                const pagination = response.pagination;
+                
+                if (pagination) {
+                    document.getElementById('stat-songs').textContent = pagination.totalItems;
+                    renderAdminPagination('admin-songs-pagination', pagination, 'loadAdminSongs');
+                } else {
+                    document.getElementById('stat-songs').textContent = songs.length;
+                    document.getElementById('admin-songs-pagination').innerHTML = '';
+                }
+
                 tbody.innerHTML = '';
                 
                 if(songs.length === 0) {
@@ -781,9 +838,11 @@
                     
                     const date = new Date(s.created_at).toLocaleDateString('vi-VN');
                     
+                    const actualIndex = pagination ? (pagination.currentPage - 1) * pagination.limit + idx + 1 : idx + 1;
+
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="text-secondary fw-bold">${idx + 1}</td>
+                        <td class="text-secondary fw-bold">${actualIndex}</td>
                         <td>
                             <div class="d-flex align-items-center gap-3">
                                 <img src="${coverUrl}" class="track-cover-sm shadow-sm" alt="Cover">
@@ -823,11 +882,21 @@
             }
         }
 
-        async function loadUsers() {
+        async function loadUsers(page = 1) {
+            currentUserPage = page;
             const tbody = document.getElementById('admin-users-list');
             tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div></td></tr>`;
             try {
-                const users = await api.getUsers();
+                const response = await api.getUsers(page, ITEMS_PER_PAGE);
+                const users = response.data || response;
+                const pagination = response.pagination;
+                
+                if (pagination) {
+                    renderAdminPagination('admin-users-pagination', pagination, 'loadUsers');
+                } else {
+                    document.getElementById('admin-users-pagination').innerHTML = '';
+                }
+
                 tbody.innerHTML = '';
                 
                 if(users.length === 0) {
@@ -850,10 +919,11 @@
                         : `<span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary fw-bold px-3 py-1 rounded-pill">Người dùng</span>`;
                     
                     const nextRole = u.role === 'admin' ? 'user' : 'admin';
+                    const actualIndex = pagination ? (pagination.currentPage - 1) * pagination.limit + idx + 1 : idx + 1;
                     
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="text-secondary fw-bold">${idx + 1}</td>
+                        <td class="text-secondary fw-bold">${actualIndex}</td>
                         <td>
                             <div class="d-flex align-items-center gap-3">
                                 <img src="https://ui-avatars.com/api/?name=${u.username}&background=random&color=fff&size=48" class="rounded-circle shadow-sm" alt="Avatar">
@@ -942,15 +1012,25 @@
             }
         });
 
-        async function loadArtists() {
+        async function loadArtists(page = 1) {
+            currentArtistPage = page;
             const tbody = document.getElementById('admin-artists-list');
             tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status"></div></td></tr>`;
             try {
-                const artists = await api.getArtists();
+                const response = await api.getArtists(page, ITEMS_PER_PAGE);
+                const artists = response.data || response;
+                const pagination = response.pagination;
+                
+                if (pagination) {
+                    renderAdminPagination('admin-artists-pagination', pagination, 'loadArtists');
+                } else {
+                    document.getElementById('admin-artists-pagination').innerHTML = '';
+                }
+
                 currentArtists = artists;
                 
                 const datalist = document.getElementById('artist-list');
-                if (datalist) {
+                if (datalist && page === 1) { // Only update datalist on first page or we might need it elsewhere
                     datalist.innerHTML = artists.map(a => `<option value="${a.name}">`).join('');
                 }
                 
@@ -967,10 +1047,11 @@
                     if(a.profile_image_url && !a.profile_image_url.startsWith('http')) coverUrl = `http://localhost:3000${a.profile_image_url}`;
                     
                     const date = new Date(a.created_at).toLocaleDateString('vi-VN');
+                    const actualIndex = pagination ? (pagination.currentPage - 1) * pagination.limit + idx + 1 : idx + 1;
                     
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="text-secondary fw-bold">${idx + 1}</td>
+                        <td class="text-secondary fw-bold">${actualIndex}</td>
                         <td>
                             <div class="d-flex align-items-center gap-3">
                                 <img src="${coverUrl}" class="rounded-circle shadow-sm" style="width:48px; height:48px; object-fit:cover;" alt="Avatar">
@@ -1059,9 +1140,10 @@
         let currentViewArtistId = null;
         let currentViewArtistName = null;
 
-        async function openArtistSongs(id, name) {
+        async function openArtistSongs(id, name, page = 1) {
             currentViewArtistId = id;
             currentViewArtistName = name;
+            currentArtistSongPage = page;
             
             document.getElementById('view-artist-name-title').textContent = name;
             const tbody = document.getElementById('artist-songs-list');
@@ -1075,11 +1157,22 @@
                 if(bsCollapse) bsCollapse.hide();
             }
 
-            const modal = new bootstrap.Modal(document.getElementById('viewArtistSongsModal'));
-            modal.show();
+            const modalInfo = bootstrap.Modal.getInstance(document.getElementById('viewArtistSongsModal'));
+            if (!modalInfo) {
+                new bootstrap.Modal(document.getElementById('viewArtistSongsModal')).show();
+            }
             
             try {
-                const songs = await api.getArtistSongs(id);
+                const response = await api.getArtistSongs(id, page, ITEMS_PER_PAGE);
+                const songs = response.data || response;
+                const pagination = response.pagination;
+
+                if (pagination) {
+                    renderAdminPagination('admin-artist-songs-pagination', pagination, `openArtistSongs(${id}, '${name.replace(/'/g, "\\'")}', [PAGE])`);
+                } else {
+                    document.getElementById('admin-artist-songs-pagination').innerHTML = '';
+                }
+
                 tbody.innerHTML = '';
                 
                 if(songs.length === 0) {
@@ -1088,9 +1181,10 @@
                 }
                 
                 songs.forEach((s, idx) => {
+                    const actualIndex = pagination ? (pagination.currentPage - 1) * pagination.limit + idx + 1 : idx + 1;
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="text-secondary fw-bold">${idx + 1}</td>
+                        <td class="text-secondary fw-bold">${actualIndex}</td>
                         <td class="fw-bold fs-6">${s.title}</td>
                         <td class="text-end text-success fw-bold">${s.play_count} <i class="fa-solid fa-play fa-xs ms-1"></i></td>
                     `;

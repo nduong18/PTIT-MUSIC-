@@ -96,6 +96,29 @@ Server sẽ mặc định chạy trên cổng `3000`.
 
 Để hỗ trợ việc kiểm thử (test) bằng Postman, dưới đây là chi tiết từng cụm API với định dạng dữ liệu cụ thể.
 
+### 📌 Ghi chú Hệ thống Phân trang (Pagination)
+Hầu hết các API trả về dạng danh sách (bài hát, nghệ sĩ, thành viên, v.v...) đều **hỗ trợ phân trang**. Bạn có thể truyền định tuyến theo các query parameter sau:
+- `?page=1` (Mặc định là undefined nếu không truyền, tương đương với việc trả về dạng mảng dữ liệu thuần tĩnh)
+- `?limit=10` (Mặc định là 10, quy định số lượng kết quả mỗi trang)
+
+**Ví dụ Request:** `GET /api/songs?page=1&limit=5`
+
+**Cấu trúc dữ liệu trả về khi có phân trang:**
+```json
+{
+  "data": [
+    { "id": 1, "title": "Bài hát 1", "..." : "..." }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "limit": 5,
+    "totalItems": 24,
+    "totalPages": 5
+  }
+}
+```
+*(Nếu không truyền tham số `page`, API sẽ trả về cấu trúc mảng thuần tuý: `[ { id: 1, ... } ]` để đảm bảo tương thích ngược).*
+
 ### 1. Hệ thống Xác thực (Authentication)
 **Base URL:** `http://localhost:3000/api/auth`
 
@@ -134,7 +157,7 @@ Server sẽ mặc định chạy trên cổng `3000`.
 **Base URL:** `http://localhost:3000/api/songs`
 
 #### 🎵 Lấy tất cả bài hát
-- **URL:** `http://localhost:3000/api/songs`
+- **URL:** `http://localhost:3000/api/songs` *(Hỗ trợ `?page=` & `?limit=` phân trang)*
 - **Method:** `GET`
 
 #### 📤 Upload bài hát (Admin Only - Cần Token)
@@ -148,9 +171,9 @@ Server sẽ mặc định chạy trên cổng `3000`.
   - `cover`: (File) - [Chọn file ảnh .jpg/.png]
 
 #### 🔍 Tìm kiếm bài hát
-- **URL:** `http://localhost:3000/api/songs/search?q={keyword}`
+- **URL:** `http://localhost:3000/api/songs/search?q={keyword}` *(Hỗ trợ `&page=` & `limit=` phân trang)*
 - **Method:** `GET`
-- **Ví dụ:** `http://localhost:3000/api/songs/search?q=con mua`
+- **Ví dụ:** `http://localhost:3000/api/songs/search?q=con mua&page=1&limit=5`
 - *Kết quả trả về danh sách bài hát khớp với tiêu đề hoặc nghệ sĩ (hỗ trợ không dấu).*
 
 #### 📈 Tăng lượt nghe
@@ -193,7 +216,7 @@ Server sẽ mặc định chạy trên cổng `3000`.
 ```
 
 #### 🎶 Lấy bài hát trong playlist
-- **URL:** `http://localhost:3000/api/playlists/{id}/songs`
+- **URL:** `http://localhost:3000/api/playlists/{id}/songs` *(Hỗ trợ phân trang: `?page=1`)*
 - **Method:** `GET`
 
 #### ✏️ Đổi tên playlist
@@ -216,7 +239,7 @@ Server sẽ mặc định chạy trên cổng `3000`.
 - **Method:** `GET`
 
 #### 👥 Danh sách người dùng
-- **URL:** `http://localhost:3000/api/admin/users`
+- **URL:** `http://localhost:3000/api/admin/users` *(Hỗ trợ phân trang: `?page=1`)*
 - **Method:** `GET`
 
 #### 🛠️ Cập nhật quyền (Role)
@@ -232,10 +255,10 @@ Server sẽ mặc định chạy trên cổng `3000`.
 ---
 
 ### 5. Nghệ sĩ & Yêu thích
-- **Lấy danh sách nghệ sĩ**: `GET http://localhost:3000/api/artists`
+- **Lấy danh sách nghệ sĩ**: `GET http://localhost:3000/api/artists` *(Hỗ trợ `?page=`)*
 - **Thêm nghệ sĩ (Admin)**: `POST http://localhost:3000/api/artists` (form-data: `name`, `bio`, `profile_image`)
 - **Yêu thích bài hát**: `POST http://localhost:3000/api/liked/{song_id}` (Cần Token)
-- **Xem danh sách yêu thích**: `GET http://localhost:3000/api/liked` (Cần Token)
+- **Xem danh sách yêu thích**: `GET http://localhost:3000/api/liked` (Cần Token) *(Hỗ trợ phân trang `?page=`)*
 
 ---
 

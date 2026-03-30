@@ -20,15 +20,30 @@ const upload = multer({ storage: storage });
 // Get all artists (Admin primarily, but could be public)
 router.get('/', async (req, res) => {
     try {
-        const [artists] = await pool.query(`
+        const page = req.query.page ? parseInt(req.query.page) : null;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+
+        let query = `
             SELECT a.id, a.name, a.bio, a.profile_image_url, a.created_at,
                    COUNT(s.id) as total_songs
             FROM artists a
             LEFT JOIN songs s ON a.id = s.artist_id
             GROUP BY a.id
             ORDER BY a.created_at DESC
-        `);
-        res.json(artists);
+        `;
+
+        if (page !== null) {
+            const offset = (page - 1) * limit;
+            const [[{ totalItems }]] = await pool.query('SELECT COUNT(*) as totalItems FROM artists');
+            const [artists] = await pool.query(query + ` LIMIT ? OFFSET ?`, [limit, offset]);
+            res.json({
+                data: artists,
+                pagination: { currentPage: page, limit, totalItems, totalPages: Math.ceil(totalItems / limit) }
+            });
+        } else {
+            const [artists] = await pool.query(query);
+            res.json(artists);
+        }
     } catch (error) {
         console.error('Error fetching artists:', error);
         res.status(500).json({ message: "Error fetching artists" });
@@ -115,14 +130,28 @@ router.delete('/:id', [verifyToken, isAdmin], async (req, res) => {
 router.get('/:id/songs', async (req, res) => {
     try {
         const artistId = req.params.id;
-        const [songs] = await pool.query(`
+        const page = req.query.page ? parseInt(req.query.page) : null;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+
+        let query = `
             SELECT s.id, s.title, s.mp3_url, s.cover_url, s.duration, s.play_count, s.created_at
             FROM songs s
             WHERE s.artist_id = ?
             ORDER BY s.created_at DESC
-        `, [artistId]);
-        
-        res.json(songs);
+        `;
+
+        if (page !== null) {
+            const offset = (page - 1) * limit;
+            const [[{ totalItems }]] = await pool.query('SELECT COUNT(*) as totalItems FROM songs WHERE artist_id = ?', [artistId]);
+            const [songs] = await pool.query(query + ` LIMIT ? OFFSET ?`, [artistId, limit, offset]);
+            res.json({
+                data: songs,
+                pagination: { currentPage: page, limit, totalItems, totalPages: Math.ceil(totalItems / limit) }
+            });
+        } else {
+            const [songs] = await pool.query(query, [artistId]);
+            res.json(songs);
+        }
     } catch (error) {
         console.error('Error fetching artist songs:', error);
         res.status(500).json({ message: "Error fetching artist songs" });

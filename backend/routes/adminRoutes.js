@@ -26,8 +26,23 @@ router.get('/stats', async (req, res) => {
 // 2. Get All Users
 router.get('/users', async (req, res) => {
     try {
-        const [users] = await pool.query('SELECT id, username, email, role, created_at FROM users ORDER BY created_at DESC');
-        res.json(users);
+        const page = req.query.page ? parseInt(req.query.page) : null;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+
+        let query = 'SELECT id, username, email, role, created_at FROM users ORDER BY created_at DESC';
+
+        if (page !== null) {
+            const offset = (page - 1) * limit;
+            const [[{ totalItems }]] = await pool.query('SELECT COUNT(*) as totalItems FROM users');
+            const [users] = await pool.query(query + ` LIMIT ? OFFSET ?`, [limit, offset]);
+            res.json({
+                data: users,
+                pagination: { currentPage: page, limit, totalItems, totalPages: Math.ceil(totalItems / limit) }
+            });
+        } else {
+            const [users] = await pool.query(query);
+            res.json(users);
+        }
     } catch (error) {
         console.error('Error fetching users:', error);
         res.status(500).json({ message: "Error fetching users" });

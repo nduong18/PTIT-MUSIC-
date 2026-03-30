@@ -40,8 +40,8 @@ const api = {
     getProfile: () => api.request('/auth/me', 'GET', null, true),
 
     // Songs
-    getSongs: () => api.request('/songs', 'GET'),
-    searchSongs: (query) => api.request(`/songs/search?q=${encodeURIComponent(query)}`, 'GET'),
+    getSongs: (page = null, limit = 10) => api.request('/songs' + (page ? `?page=${page}&limit=${limit}` : ''), 'GET'),
+    searchSongs: (query, page = null, limit = 10) => api.request(`/songs/search?q=${encodeURIComponent(query)}` + (page ? `&page=${page}&limit=${limit}` : ''), 'GET'),
     uploadSong: (formData) => api.request('/songs', 'POST', formData, true, true),
     deleteSong: (id) => api.request(`/songs/${id}`, 'DELETE', null, true),
 
@@ -51,22 +51,22 @@ const api = {
     renamePlaylist: (id, name) => api.request(`/playlists/${id}`, 'PUT', { name }, true),
     deletePlaylist: (id) => api.request(`/playlists/${id}`, 'DELETE', null, true),
     addSongToPlaylist: (playlistId, songId) => api.request(`/playlists/${playlistId}/songs`, 'POST', { song_id: songId }, true),
-    getPlaylistSongs: (playlistId) => api.request(`/playlists/${playlistId}/songs`, 'GET', null, true),
+    getPlaylistSongs: (playlistId, page = null, limit = 10) => api.request(`/playlists/${playlistId}/songs` + (page ? `?page=${page}&limit=${limit}` : ''), 'GET', null, true),
 
     // Artists
-    getArtists: () => api.request('/artists', 'GET', null, true),
+    getArtists: (page = null, limit = 10) => api.request('/artists' + (page ? `?page=${page}&limit=${limit}` : ''), 'GET', null, true),
     createArtist: (formData) => api.request('/artists', 'POST', formData, true, true),
     updateArtist: (id, formData) => api.request(`/artists/${id}`, 'PUT', formData, true, true),
     deleteArtist: (id) => api.request(`/artists/${id}`, 'DELETE', null, true),
-    getArtistSongs: (id) => api.request(`/artists/${id}/songs`, 'GET', null, true),
+    getArtistSongs: (id, page = null, limit = 10) => api.request(`/artists/${id}/songs` + (page ? `?page=${page}&limit=${limit}` : ''), 'GET', null, true),
 
     // Liked Songs
-    getLikedSongs: () => api.request('/liked', 'GET', null, true),
+    getLikedSongs: (page = null, limit = 10) => api.request('/liked' + (page ? `?page=${page}&limit=${limit}` : ''), 'GET', null, true),
     toggleLike: (songId) => api.request(`/liked/${songId}`, 'POST', null, true),
 
     // Admin & Plays
     getAdminStats: () => api.request('/admin/stats', 'GET', null, true),
-    getUsers: () => api.request('/admin/users', 'GET', null, true),
+    getUsers: (page = null, limit = 10) => api.request('/admin/users' + (page ? `?page=${page}&limit=${limit}` : ''), 'GET', null, true),
     deleteUser: (id) => api.request(`/admin/users/${id}`, 'DELETE', null, true),
     updateUserRole: (id, role) => api.request(`/admin/users/${id}/role`, 'PUT', { role }, true),
     recordPlay: (id) => api.request(`/songs/${id}/play`, 'POST')

@@ -49,20 +49,33 @@ router.post('/:id/songs', verifyToken, async (req, res) => {
 router.get('/:id/songs', verifyToken, async (req, res) => {
     try {
         const playlistId = req.params.id;
+        const page = req.query.page ? parseInt(req.query.page) : null;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 10;
         
         const [playlist] = await pool.query('SELECT id FROM playlists WHERE id = ? AND user_id = ?', [playlistId, req.userId]);
         if (playlist.length === 0) return res.status(403).json({ message: "Unauthorized or not found" });
 
-        const [songs] = await pool.query(`
+        let query = `
             SELECT s.*, a.name as artist_name 
             FROM songs s
             JOIN playlist_songs ps ON s.id = ps.song_id
             LEFT JOIN artists a ON s.artist_id = a.id
             WHERE ps.playlist_id = ?
             ORDER BY ps.added_at DESC
-        `, [playlistId]);
+        `;
 
-        res.json(songs);
+        if (page !== null) {
+            const offset = (page - 1) * limit;
+            const [[{ totalItems }]] = await pool.query('SELECT COUNT(*) as totalItems FROM playlist_songs WHERE playlist_id = ?', [playlistId]);
+            const [songs] = await pool.query(query + ` LIMIT ? OFFSET ?`, [playlistId, limit, offset]);
+            res.json({
+                data: songs,
+                pagination: { currentPage: page, limit, totalItems, totalPages: Math.ceil(totalItems / limit) }
+            });
+        } else {
+            const [songs] = await pool.query(query, [playlistId]);
+            res.json(songs);
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error fetching songs from playlist" });

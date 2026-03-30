@@ -4,6 +4,14 @@ const app = {
     allSongs: [],
     currentPlaylistId: null,
     currentSongToAdd: null,
+    pageState: {
+        home: 1,
+        search: 1,
+        liked: 1,
+        playlist: 1,
+        charts: 1
+    },
+    ITEMS_PER_PAGE: 5,
 
     removeVietnameseTones(str) {
         if (!str) return '';
@@ -35,6 +43,38 @@ const app = {
         await this.loadHomeSongs();
         
         // ended listener is now handled exclusively in player.js
+    },
+
+    renderPagination(containerId, paginationObj, actionStr) {
+        const container = document.getElementById(containerId);
+        if(!container) return;
+        container.innerHTML = '';
+        if(!paginationObj || paginationObj.totalPages <= 1) return;
+
+        const { currentPage, totalPages } = paginationObj;
+        let html = '';
+
+        const getClickStr = (p) => actionStr.includes('[PAGE]') ? actionStr.replace(/\[PAGE\]/g, p) : `${actionStr}(${p})`;
+
+        const prevDisabled = currentPage === 1 ? 'disabled' : '';
+        html += `<button class="btn btn-sm btn-outline-secondary rounded ${prevDisabled}" onclick="${getClickStr(currentPage - 1)}"><i class="fa-solid fa-chevron-left"></i></button>`;
+
+        for(let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                if (i === currentPage) {
+                    html += `<button class="btn btn-sm btn-danger rounded" onclick="${getClickStr(i)}">${i}</button>`;
+                } else {
+                    html += `<button class="btn btn-sm btn-outline-secondary rounded text-white" onclick="${getClickStr(i)}">${i}</button>`;
+                }
+            } else if (i === currentPage - 2 || i === currentPage + 2) {
+                html += `<span class="text-secondary align-self-center">...</span>`;
+            }
+        }
+
+        const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+        html += `<button class="btn btn-sm btn-outline-secondary rounded ${nextDisabled}" onclick="${getClickStr(currentPage + 1)}"><i class="fa-solid fa-chevron-right"></i></button>`;
+
+        container.innerHTML = html;
     },
 
     showToast(message, isError = false) {
@@ -235,29 +275,43 @@ const app = {
         }
     },
 
-    async loadHomeSongs() {
+    async loadHomeSongs(page = 1) {
         try {
-            let songs = await api.getSongs();
-            
-            // Mock data if DB is empty to show Spotify UI
-            if (songs.length === 0) {
-                songs = [
-                    { id: 901, title: 'Starboy', artist_name: 'The Weeknd', cover_url: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
-                    { id: 902, title: 'Blinding Lights', artist_name: 'The Weeknd', cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
-                    { id: 903, title: 'Shape of You', artist_name: 'Ed Sheeran', cover_url: 'https://images.unsplash.com/photo-1493225457124-a1a2a5f5761a?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
-                    { id: 904, title: 'Levitating', artist_name: 'Dua Lipa', cover_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' },
-                    { id: 905, title: 'Peaches', artist_name: 'Justin Bieber', cover_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3' },
-                    { id: 906, title: 'As It Was', artist_name: 'Harry Styles', cover_url: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3' },
-                    { id: 907, title: 'Stay', artist_name: 'The Kid LAROI', cover_url: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3' },
-                    { id: 908, title: 'Good 4 U', artist_name: 'Olivia Rodrigo', cover_url: 'https://images.unsplash.com/photo-1493225457124-a1a2a5f5761a?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3' }
-                ];
+            if (this.allSongs.length === 0) {
+                let songs = await api.getSongs();
+                
+                // Mock data if DB is empty to show Spotify UI
+                if (songs.length === 0) {
+                    songs = [
+                        { id: 901, title: 'Starboy', artist_name: 'The Weeknd', cover_url: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+                        { id: 902, title: 'Blinding Lights', artist_name: 'The Weeknd', cover_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
+                        { id: 903, title: 'Shape of You', artist_name: 'Ed Sheeran', cover_url: 'https://images.unsplash.com/photo-1493225457124-a1a2a5f5761a?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
+                        { id: 904, title: 'Levitating', artist_name: 'Dua Lipa', cover_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' },
+                        { id: 905, title: 'Peaches', artist_name: 'Justin Bieber', cover_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3' },
+                        { id: 906, title: 'As It Was', artist_name: 'Harry Styles', cover_url: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3' },
+                        { id: 907, title: 'Stay', artist_name: 'The Kid LAROI', cover_url: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3' },
+                        { id: 908, title: 'Good 4 U', artist_name: 'Olivia Rodrigo', cover_url: 'https://images.unsplash.com/photo-1493225457124-a1a2a5f5761a?q=80&w=400', mp3_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3' }
+                    ];
+                }
+                this.allSongs = songs;
+                this.renderQuickPicks(this.allSongs.slice(0, 6));
+                this.renderSongGrid([...this.allSongs].reverse().slice(0, 10), 'home-charts-container');
+                const chartsPaginationEl = document.getElementById('home-charts-pagination');
+                if(chartsPaginationEl) chartsPaginationEl.innerHTML = ''; // Hide pagination for charts
             }
-            this.allSongs = songs;
-
+            
+            this.pageState.home = page;
+            const res = await api.getSongs(page, this.ITEMS_PER_PAGE);
+            const paginatedSongs = res.data || res;
+            
             this.updateGreeting();
-            this.renderQuickPicks(songs.slice(0, 6));
-            this.renderSongGrid(songs, 'home-songs-container');
-            this.renderSongGrid([...songs].reverse(), 'home-charts-container');
+            this.renderSongGrid(paginatedSongs, 'home-songs-container');
+            if (res.pagination) {
+                this.renderPagination('home-songs-pagination', res.pagination, 'app.loadHomeSongs');
+            } else {
+                const el = document.getElementById('home-songs-pagination');
+                if(el) el.innerHTML = '';
+            }
         } catch(e) { console.error(e); }
     },
 
@@ -330,17 +384,25 @@ const app = {
         this.updateUIForAuth(); // Re-check auth for new dom elements
     },
 
-    async handleSearch() {
+    async handleSearch(page = 1) {
         const query = document.getElementById('search-input').value.toLowerCase();
         
         if(!query.trim()) {
             document.getElementById('search-results-container').innerHTML = '';
+            document.getElementById('search-results-pagination').innerHTML = '';
             return;
         }
 
         try {
-            const filtered = await api.searchSongs(query);
+            this.pageState.search = page;
+            const res = await api.searchSongs(query, page, this.ITEMS_PER_PAGE);
+            const filtered = res.data || res;
             this.renderSongGrid(filtered, 'search-results-container');
+            if (res.pagination) {
+                this.renderPagination('search-results-pagination', res.pagination, 'app.handleSearch');
+            } else {
+                document.getElementById('search-results-pagination').innerHTML = '';
+            }
         } catch(e) {
             console.error('Search error:', e);
         }
@@ -355,19 +417,26 @@ const app = {
         document.getElementById('library-content-container').innerHTML = '';
     },
 
-    async renderLikedSongs() {
+    async renderLikedSongs(page = 1) {
         this.currentPlaylistId = null;
         document.getElementById('library-title').textContent = "Bài hát đã thích";
         document.getElementById('btn-rename-playlist')?.classList.add('d-none');
         document.getElementById('btn-delete-playlist')?.classList.add('d-none');
         document.getElementById('playlist-add-songs-section')?.classList.add('d-none');
         try {
-            const songs = await api.getLikedSongs();
+            this.pageState.liked = page;
+            const res = await api.getLikedSongs(page, this.ITEMS_PER_PAGE);
+            const songs = res.data || res;
             this.renderSongGrid(songs, 'library-content-container');
+            if (res.pagination) {
+                this.renderPagination('library-content-pagination', res.pagination, 'app.renderLikedSongs');
+            } else {
+                document.getElementById('library-content-pagination').innerHTML = '';
+            }
         } catch(e) { this.showToast('Lỗi tải bài hát đã thích', true); }
     },
 
-    async loadPlaylistDetail(id, name) {
+    async loadPlaylistDetail(id, name, page = 1) {
         this.currentPlaylistId = id;
         document.getElementById('library-title').textContent = "Playlist: " + name;
         
@@ -393,10 +462,19 @@ const app = {
         const searchResults = document.getElementById('playlist-search-results');
         if (searchResults) searchResults.innerHTML = '';
 
+        this.pageState.playlist = page;
         this.loadView(`playlist-${id}`);
         try {
-            const songs = await api.getPlaylistSongs(id);
+            const res = await api.getPlaylistSongs(id, page, this.ITEMS_PER_PAGE);
+            const songs = res.data || res;
             this.renderSongGrid(songs, 'library-content-container');
+            if (res.pagination) {
+                // Must handle string replacement for name parameter correctly in action string
+                this.renderPagination('library-content-pagination', res.pagination, `app.loadPlaylistDetail(${id}, '${name.replace(/'/g, "\\'")}', [PAGE])`);
+            } else {
+                const pag = document.getElementById('library-content-pagination');
+                if (pag) pag.innerHTML = '';
+            }
         } catch(e) { this.showToast('Lỗi tải playlist', true); }
     },
 

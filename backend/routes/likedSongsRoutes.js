@@ -6,16 +6,30 @@ const { verifyToken } = require('../middleware/auth');
 // Get all liked songs for current user
 router.get('/', verifyToken, async (req, res) => {
     try {
-        const [songs] = await pool.query(`
+        const page = req.query.page ? parseInt(req.query.page) : null;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+
+        let query = `
             SELECT s.*, a.name as artist_name 
             FROM songs s
             JOIN liked_songs ls ON s.id = ls.song_id
             LEFT JOIN artists a ON s.artist_id = a.id
             WHERE ls.user_id = ?
             ORDER BY ls.liked_at DESC
-        `, [req.userId]);
+        `;
 
-        res.json(songs);
+        if (page !== null) {
+            const offset = (page - 1) * limit;
+            const [[{ totalItems }]] = await pool.query('SELECT COUNT(*) as totalItems FROM liked_songs WHERE user_id = ?', [req.userId]);
+            const [songs] = await pool.query(query + ` LIMIT ? OFFSET ?`, [req.userId, limit, offset]);
+            res.json({
+                data: songs,
+                pagination: { currentPage: page, limit, totalItems, totalPages: Math.ceil(totalItems / limit) }
+            });
+        } else {
+            const [songs] = await pool.query(query, [req.userId]);
+            res.json(songs);
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error fetching liked songs" });

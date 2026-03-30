@@ -117,9 +117,10 @@
                         <h4 class="fw-bold hover-underline cursor-pointer m-0" style="letter-spacing: -0.5px;">Dành cho bạn</h4>
                         <span class="text-secondary text-uppercase fs-7 fw-bold cursor-pointer hover-text-white" style="letter-spacing: 1px;">Hiện tất cả</span>
                     </div>
-                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4 mb-5" id="home-songs-container">
+                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4 mb-2" id="home-songs-container">
                         <!-- Populated via JS -->
                     </div>
+                    <div id="home-songs-pagination" class="d-flex justify-content-center mt-3 mb-5 gap-2"></div>
 
                     <!-- Category 2 -->
                     <div class="d-flex justify-content-between align-items-end mb-3">
@@ -129,6 +130,7 @@
                     <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4" id="home-charts-container">
                         <!-- Populated via JS -->
                     </div>
+                    <div id="home-charts-pagination" class="d-flex justify-content-center mt-4 gap-2"></div>
                 </div>
             </div>
 
@@ -141,6 +143,7 @@
                 <h4 class="fw-bold mb-4">Kết quả tìm kiếm</h4>
                 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4" id="search-results-container">
                 </div>
+                <div id="search-results-pagination" class="d-flex justify-content-center mt-4 gap-2"></div>
             </div>
             
             <!-- VIEW: LEADERBOARD -->
@@ -160,9 +163,10 @@
                        <button class="btn btn-outline-danger d-none fw-bold shadow-sm px-4" id="btn-delete-playlist" style="border-radius: 50px;">Xóa Playlist</button>
                    </div>
                </div>
-               <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4 mb-5" id="library-content-container">
+               <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4 mb-2" id="library-content-container">
 <!-- Populated via JS -->
                </div>
+               <div id="library-content-pagination" class="d-flex justify-content-center mt-3 mb-5 gap-2"></div>
                
                <!-- Playlist Add Songs Section -->
                <div id="playlist-add-songs-section" class="d-none mt-5 pt-4 border-top border-secondary border-opacity-25 pb-5">
