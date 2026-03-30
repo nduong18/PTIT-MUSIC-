@@ -35,6 +35,31 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Search songs (Public)
+router.get('/search', async (req, res) => {
+    try {
+        const query = req.query.q || '';
+        if (!query.trim()) {
+            return res.json([]);
+        }
+
+        const searchTerm = `%${query}%`;
+        const [songs] = await pool.query(`
+            SELECT s.id, s.title, s.mp3_url, s.cover_url, s.duration, s.play_count, s.created_at, 
+                   a.id as artist_id, a.name as artist_name 
+            FROM songs s 
+            LEFT JOIN artists a ON s.artist_id = a.id
+            WHERE s.title LIKE ? OR a.name LIKE ?
+            ORDER BY s.created_at DESC
+        `, [searchTerm, searchTerm]);
+        
+        res.json(songs);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error searching songs" });
+    }
+});
+
 // Upload a new song (Admin only)
 router.post('/', [verifyToken, isAdmin, upload.fields([{ name: 'mp3', maxCount: 1 }, { name: 'cover', maxCount: 1 }])], async (req, res) => {
     try {

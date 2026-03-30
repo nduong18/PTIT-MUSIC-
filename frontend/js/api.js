@@ -41,6 +41,7 @@ const api = {
 
     // Songs
     getSongs: () => api.request('/songs', 'GET'),
+    searchSongs: (query) => api.request(`/songs/search?q=${encodeURIComponent(query)}`, 'GET'),
     uploadSong: (formData) => api.request('/songs', 'POST', formData, true, true),
     deleteSong: (id) => api.request(`/songs/${id}`, 'DELETE', null, true),
 

@@ -5,6 +5,31 @@ const app = {
     currentPlaylistId: null,
     currentSongToAdd: null,
 
+    removeVietnameseTones(str) {
+        if (!str) return '';
+        str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+        str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+        str = str.replace(/ì|í|ị|ỉ|ã/g, "i");
+        str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+        str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+        str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+        str = str.replace(/đ/g, "d");
+        str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+        str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+        str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+        str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+        str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+        str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+        str = str.replace(/Đ/g, "D");
+        // Some system encode combined accent as separate characters
+        str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // ̀ ́ ̃ ̉ ̣  huyền, sắc, ngã, hỏi, nặng
+        str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // ˆ ̆ ̛  Â, Ă, Ơ
+        // Remove extra spaces
+        str = str.replace(/ + /g, " ");
+        str = str.trim();
+        return str;
+    },
+
     async init() {
         this.checkAuth();
         await this.loadHomeSongs();
@@ -305,17 +330,20 @@ const app = {
         this.updateUIForAuth(); // Re-check auth for new dom elements
     },
 
-    handleSearch() {
+    async handleSearch() {
         const query = document.getElementById('search-input').value.toLowerCase();
-        if(!query) {
+        
+        if(!query.trim()) {
             document.getElementById('search-results-container').innerHTML = '';
             return;
         }
-        const filtered = this.allSongs.filter(s => 
-            s.title.toLowerCase().includes(query) || 
-            (s.artist_name && s.artist_name.toLowerCase().includes(query))
-        );
-        this.renderSongGrid(filtered, 'search-results-container');
+
+        try {
+            const filtered = await api.searchSongs(query);
+            this.renderSongGrid(filtered, 'search-results-container');
+        } catch(e) {
+            console.error('Search error:', e);
+        }
     },
 
     renderLibrary() {
@@ -384,37 +412,39 @@ const app = {
         }
     },
 
-    searchAndAddToPlaylist() {
+    async searchAndAddToPlaylist() {
         if (!this.currentPlaylistId) return;
         const query = document.getElementById('playlist-search-input').value.toLowerCase();
         const resultsContainer = document.getElementById('playlist-search-results');
         resultsContainer.innerHTML = '';
-        if(!query) return;
+        if(!query.trim()) return;
 
-        const filtered = this.allSongs.filter(s => 
-            s.title.toLowerCase().includes(query) || 
-            (s.artist_name && s.artist_name.toLowerCase().includes(query))
-        ).slice(0, 5);
+        try {
+            const songs = await api.searchSongs(query);
+            const limitedResults = songs.slice(0, 5);
 
-        filtered.forEach(song => {
-            const defaultCover = 'https://images.unsplash.com/photo-1621360811013-c76831f1f3b0?q=80&w=400&auto=format&fit=crop';
-            let coverUrl = song.cover_url ? song.cover_url : defaultCover;
-            if(!coverUrl.startsWith('http')) coverUrl = `http://localhost:3000${coverUrl}`;
+            limitedResults.forEach(song => {
+                const defaultCover = 'https://images.unsplash.com/photo-1621360811013-c76831f1f3b0?q=80&w=400&auto=format&fit=crop';
+                let coverUrl = song.cover_url ? song.cover_url : defaultCover;
+                if(!coverUrl.startsWith('http')) coverUrl = `http://localhost:3000${coverUrl}`;
 
-            const item = document.createElement('div');
-            item.className = 'list-group-item list-group-item-action bg-dark text-white d-flex align-items-center justify-content-between border-secondary py-2 px-3 rounded-2';
-            item.innerHTML = `
-                <div class="d-flex align-items-center gap-3">
-                    <img src="${coverUrl}" alt="${song.title}" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                    <div>
-                        <h6 class="m-0 text-white">${song.title}</h6>
-                        <small class="text-white-50">${song.artist_name || 'Unknown Artist'}</small>
+                const item = document.createElement('div');
+                item.className = 'list-group-item list-group-item-action bg-dark text-white d-flex align-items-center justify-content-between border-secondary py-2 px-3 rounded-2';
+                item.innerHTML = `
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="${coverUrl}" alt="${song.title}" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                        <div>
+                            <h6 class="m-0 text-white">${song.title}</h6>
+                            <small class="text-white-50">${song.artist_name || 'Unknown Artist'}</small>
+                        </div>
                     </div>
-                </div>
-                <button class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="app.addSongToCurrentPlaylist(${song.id})">Thêm</button>
-            `;
-            resultsContainer.appendChild(item);
-        });
+                    <button class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="app.addSongToCurrentPlaylist(${song.id})">Thêm</button>
+                `;
+                resultsContainer.appendChild(item);
+            });
+        } catch(e) {
+            console.error('Playlist search error:', e);
+        }
     },
 
     async addSongToCurrentPlaylist(songId) {

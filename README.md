@@ -147,6 +147,12 @@ Server sẽ mặc định chạy trên cổng `3000`.
   - `mp3`: (File) - [Chọn file .mp3]
   - `cover`: (File) - [Chọn file ảnh .jpg/.png]
 
+#### 🔍 Tìm kiếm bài hát
+- **URL:** `http://localhost:3000/api/songs/search?q={keyword}`
+- **Method:** `GET`
+- **Ví dụ:** `http://localhost:3000/api/songs/search?q=con mua`
+- *Kết quả trả về danh sách bài hát khớp với tiêu đề hoặc nghệ sĩ (hỗ trợ không dấu).*
+
 #### 📈 Tăng lượt nghe
 - **URL:** `http://localhost:3000/api/songs/{id}/play` (Ví dụ: `.../songs/1/play`)
 - **Method:** `POST`
